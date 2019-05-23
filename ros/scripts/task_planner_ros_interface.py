@@ -19,14 +19,15 @@ class TaskPlannerROSInterface():
 
     def __init__(self):
         planner_params = rospy.get_param('~planner_params', None)
+        plan_file_path = rospy.get_param('~plan_file_path', '/tmp')
         print(planner_params)
         self.kb_interface = KnowledgeBaseInterface(planner_params['kb_database_name'])
         self.planner = MetricFFInterface(
-                planner_params['kb_database_name'],
-                planner_params['domain_file'],
-                planner_params['planner_cmd'],
-                planner_params['plan_file_path'],
-                debug=True)
+            planner_params['kb_database_name'],
+            planner_params['domain_file'],
+            planner_params['planner_cmd'],
+            plan_file_path,
+            debug=True)
         print("initialised planner")
 
         task_request = TaskRequest()

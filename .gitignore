@@ -1,2 +1,8 @@
 # .pyc files
 *.pyc
+
+# plan files
+tmp/plan_*
+
+# problem files
+tmp/problem_*
