@@ -1,7 +1,13 @@
 <?xml version="1.0"?>
 <launch>
-    <node name="task_planner_ros_interface" pkg="task_planner_ros_wrapper" type="task_planner_ros_interface.py" output="screen">
-        <rosparam command="load" file="$(find task_planner_ros_wrapper)/ros/config/config.yaml" />
-        <param name="plan_file_path" value="$(find task_planner_ros_wrapper)/tmp" />
-    </node>
+    <group ns="ropod_task_planning">
+        <node name="task_planner" pkg="task_planner_ros_wrapper" type="task_planner_ros_interface" output="screen">
+            <rosparam command="load" file="$(find task_planner_ros_wrapper)/ros/config/config.yaml" />
+            <param name="plan_file_path" type="string" value="$(find task_planner_ros_wrapper)/tmp" />
+
+            <!-- <remap from="~update_kb" to="" /> -->
+            <!-- <remap from="~query_kb" to="" /> -->
+            <!-- <remap from="~plan" to="" /> -->
+        </node>
+    </group>
 </launch>
