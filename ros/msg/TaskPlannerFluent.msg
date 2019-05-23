@@ -7,9 +7,4 @@ string name
 diagnostic_msgs/KeyValue[] params
 
 # fluent value
-string value
-uint8 value_type
-
-# constants for type
-uint8 STRING = 0
-uint8 INT = 1
+TaskPlannerFluentValue value
