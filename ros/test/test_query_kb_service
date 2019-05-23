@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+'''
+This module is a test for TaskPlannerUpdateKB service. It creates a client for
+that service and checks the output based on the response.
+'''
+
+from __future__ import print_function
+
+NODE = 'test_task_planner_query_kb'
+
+import rospy
+import unittest
+import pymongo as pm
+
+from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
+from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerQueryKBRequest
+from diagnostic_msgs.msg import KeyValue
+
+class TestQueryKB(unittest.TestCase):
+
+    """Test TaskPlannerQueryKB service."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Initialise ros node
+
+        """
+        rospy.init_node(NODE)
+        cls.service_name = '/ropod_task_planning/task_planner/query_kb'
+        cls.db_name = 'ropod_kb_ros'
+        cls.collection_name = 'knowledge_base'
+        cls.client = pm.MongoClient()
+        cls.client.drop_database(cls.db_name)
+        # TODO: create a db to query
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.drop_database(cls.db_name)
+
+    def setUp(self):
+        """Get service proxy
+        """
+        print("waiting for service")
+        rospy.wait_for_service(self.service_name)
+        print("Got service")
+        self.query_kb = rospy.ServiceProxy(
+            self.service_name,
+            TaskPlannerQueryKB)
+
+    def tearDown(self):
+        self.query_kb = None
+
+    def test_get_predicate_names(self):
+        request = TaskPlannerQueryKBRequest()
+        response = self.query_kb(request)
+        collection = self.assert_and_get_collection()
+        predicate = collection.find_one()
+        print(predicate)
+
+    def test_get_fluent_names(self):
+        # TODO
+        pass
+
+    def test_get_predicate_assertions(self):
+        # TODO
+        pass
+        
+    def test_get_fluent_assertions(self):
+        # TODO
+        pass
+        
+    def test_fluent_value(self):
+        # TODO
+        pass
+
+    def assert_and_get_collection(self):
+        self.assertIn(self.db_name, self.client.list_database_names())
+        db = self.client[self.db_name]
+        self.assertIn(self.collection_name, db.list_collection_names())
+        collection = db[self.collection_name]
+        return collection
+
+def main():
+    response = update_kb(request)
+    rospy.loginfo(response)
+
+if __name__ == "__main__":
+    unittest.main()
