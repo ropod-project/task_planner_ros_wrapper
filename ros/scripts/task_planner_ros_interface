@@ -5,13 +5,17 @@ ROS wrapper for task planner.
 
 from __future__ import print_function
 
-import rospy
 import uuid
+import rospy
+
 from ropod.structs.task import TaskRequest
 from task_planner.metric_ff_interface import MetricFFInterface
 from task_planner.knowledge_base_interface import KnowledgeBaseInterface
 
-NODE = 'task_planner_ros_interface'
+from task_planner_ros_wrapper.msg import *
+from task_planner_ros_wrapper.srv import *
+
+NODE = 'task_planner'
 
 class TaskPlannerROSInterface():
 
@@ -20,7 +24,6 @@ class TaskPlannerROSInterface():
     def __init__(self):
         planner_params = rospy.get_param('~planner_params', None)
         plan_file_path = rospy.get_param('~plan_file_path', '/tmp')
-        print(planner_params)
         self.kb_interface = KnowledgeBaseInterface(planner_params['kb_database_name'])
         self.planner = MetricFFInterface(
             planner_params['kb_database_name'],
@@ -30,46 +33,33 @@ class TaskPlannerROSInterface():
             debug=True)
         print("initialised planner")
 
-        task_request = TaskRequest()
-        task_request.load_id = 'mobidik_123'
-        task_request.load_type = 'mobidik'
-        task_request.delivery_pose.id = 'C0'
-        task_request.delivery_pose.name = 'BRSU_L0_C0'
-        task_request.delivery_pose.floor_number = '0'
-        task_request.pickup_pose.id = 'C5'
-        task_request.pickup_pose.name = 'BRSU_L0_C5'
-        task_request.pickup_pose.floor_number = '0'
+        rospy.Service('~update_kb', TaskPlannerUpdateKB, self._service_update_kb_request)
+        rospy.Service('~query_kb', TaskPlannerQueryKB, self._service_query_kb_request)
+        # TODO: initialise plan action server
 
-        robot_name = 'dummy_robot_{0}'.format(str(uuid.uuid4()))
-        self.add_task_request_related_objects_and_fluents(task_request, robot_name)
-        actions = []
-        try:
-            # we set the task goals based on the task request
-            task_goals = []
-            if task_request.load_type == 'mobidik':
-                task_goals = [('load_at', [('load', task_request.load_id),
-                                           ('loc', task_request.delivery_pose.name)]),
-                              ('empty_gripper', [('bot', robot_name)])]
-            elif task_request.load_type == 'sickbed':
-                # TBD
-                pass
 
-            # we get the action plan
-            plan_found, actions = self.planner.plan(task_request, robot_name, task_goals)
-            if plan_found:
-                for action in actions:
-                    print("Action added: %s", action.type)
-            else:
-                print('Task plan could not be found' )
-        except Exception as exc:
-            print('A plan could not be created: %s', str(exc))
+    def _service_update_kb_request(self, req):
+        """Service request for updating task planner's knowledge base
 
-        # we remove the location of the dummy robot from the knowledge base
-        self.kb_interface.remove_facts([('robot_at', [('bot', robot_name),
-                                                      ('loc', task_request.pickup_pose.name)]),
-                                        ('empty_gripper', [('bot', robot_name)])])
+        :req: TaskPlannerUpdateKBRequest
+        :returns: TaskPlannerUpdateKBResponse
 
-    def add_task_request_related_objects_and_fluents(self, task_request, robot_name, elevator_needed=False):
+        """
+        rospy.loginfo(req)
+        return TaskPlannerUpdateKBResponse()
+
+    def _service_query_kb_request(self, req):
+        """Service request for querying task planner's knowledge base
+
+        :req: TaskPlannerQueryKBRequest
+        :returns: TaskPlannerQueryKBResponse
+
+        """
+        rospy.loginfo(req)
+        return TaskPlannerQueryKBResponse()
+
+    def _add_task_request_related_objects_and_fluents(self, task_request,
+                                                     robot_name, elevator_needed=False):
         """add objects and fluents to the kb using kb interface related to task
         request.
 
@@ -115,5 +105,44 @@ class TaskPlannerROSInterface():
 if __name__ == "__main__":
     rospy.init_node(NODE)
     TASK_PLANNER_ROS_INTERFACE = TaskPlannerROSInterface()
-    # rospy.spin()
+    rospy.spin()
     rospy.loginfo("[%s] Stopped", NODE)
+
+# task_request = TaskRequest()
+# task_request.load_id = 'mobidik_123'
+# task_request.load_type = 'mobidik'
+# task_request.delivery_pose.id = 'C0'
+# task_request.delivery_pose.name = 'BRSU_L0_C0'
+# task_request.delivery_pose.floor_number = '0'
+# task_request.pickup_pose.id = 'C5'
+# task_request.pickup_pose.name = 'BRSU_L0_C5'
+# task_request.pickup_pose.floor_number = '0'
+
+# robot_name = 'dummy_robot_{0}'.format(str(uuid.uuid4()))
+# self.add_task_request_related_objects_and_fluents(task_request, robot_name)
+# actions = []
+# try:
+#     # we set the task goals based on the task request
+#     task_goals = []
+#     if task_request.load_type == 'mobidik':
+#         task_goals = [('load_at', [('load', task_request.load_id),
+#                                    ('loc', task_request.delivery_pose.name)]),
+#                       ('empty_gripper', [('bot', robot_name)])]
+#     elif task_request.load_type == 'sickbed':
+#         # TBD
+#         pass
+
+#     # we get the action plan
+#     plan_found, actions = self.planner.plan(task_request, robot_name, task_goals)
+#     if plan_found:
+#         for action in actions:
+#             print("Action added: %s", action.type)
+#     else:
+#         print('Task plan could not be found')
+# except Exception as exc:
+#     print('A plan could not be created: %s', str(exc))
+
+# # we remove the location of the dummy robot from the knowledge base
+# self.kb_interface.remove_facts([('robot_at', [('bot', robot_name),
+#                                               ('loc', task_request.pickup_pose.name)]),
+#                                 ('empty_gripper', [('bot', robot_name)])])
