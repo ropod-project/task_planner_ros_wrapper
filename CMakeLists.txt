@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs 
   actionlib
   std_msgs
+  diagnostic_msgs
   rospy
 )
 
@@ -22,20 +23,22 @@ include_directories(
 add_message_files(
   DIRECTORY ros/msg
   FILES
-  KnowledgeItem.msg
+  TaskPlannerPredicate.msg
+  TaskPlannerFluent.msg
 )
 
 add_service_files(
   DIRECTORY ros/srv
   FILES
-  KnowledgeUpdateService.srv
-  KnowledgeQueryService.srv
+  TaskPlannerUpdateKB.srv
+  TaskPlannerQueryKB.srv
 )
 
-# add_action_files(
-#   DIRECTORY ros/action
-#   FILES
-# )
+add_action_files(
+  DIRECTORY ros/action
+  FILES
+  TaskPlannerPlan.action
+)
 
 catkin_python_setup()
 
@@ -43,9 +46,10 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   actionlib_msgs
+  diagnostic_msgs
 )
 
 catkin_package(CATKIN_DEPENDS
-  message_runtime std_msgs actionlib_msgs
+  message_runtime std_msgs actionlib_msgs diagnostic_msgs
 )
 
