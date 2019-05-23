@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+'''
+This module is a test for TaskPlannerUpdateKB service. It creates a client for
+that service and checks the output based on the response.
+'''
+
+from __future__ import print_function
+
+NODE = 'test_task_planner_update_kb'
+
+import rospy
+import unittest
+import pymongo as pm
+
+from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
+from task_planner_ros_wrapper.srv import TaskPlannerUpdateKB, TaskPlannerUpdateKBRequest
+from diagnostic_msgs.msg import KeyValue
+
+class TestUpdateKB(unittest.TestCase):
+
+    """Test TaskPlannerUpdateKB service."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Initialise ros node
+
+        """
+        rospy.init_node(NODE)
+        cls.service_name = '/ropod_task_planning/task_planner/update_kb'
+        cls.db_name = 'ropod_kb_ros'
+        cls.client = pm.MongoClient()
+
+    def setUp(self):
+        """Get service proxy
+        """
+        print("waiting for service")
+        rospy.wait_for_service(self.service_name)
+        print("Got service")
+        self.update_kb = rospy.ServiceProxy(
+            self.service_name,
+            TaskPlannerUpdateKB)
+
+    def tearDown(self):
+        self.update_kb = None
+        self.client.drop_database(self.db_name)
+
+    def test_add_predicates(self):
+        request = TaskPlannerUpdateKBRequest()
+        predicate = TaskPlannerPredicate(
+            name='on', 
+            params=[
+                KeyValue(key='computer', value='laptop'), 
+                KeyValue(key='table', value='work-desk')
+            ])
+        response = self.update_kb(request)
+        self.assertTrue(response.success)
+        collection = self.assert_and_get_collection()
+        predicate = collection.find_one()
+        print(predicate)
+
+    def test_remove_predicates(self):
+        # TODO
+        pass
+
+    def test_add_fluents(self):
+        # TODO
+        pass
+        
+    def test_remove_fluents(self):
+        # TODO
+        pass
+        
+    def test_add_goals(self):
+        # TODO
+        pass
+        
+    def test_remove_goals(self):
+        # TODO
+        pass
+
+    def assert_and_get_collection(self):
+        self.assertIn(self.db_name, self.client.list_database_names())
+        db = self.client[self.db_name]
+        self.assertIn('knowledge_base', db.list_collection_names())
+        collection = db['knowledge_base']
+        return collection
+        
+
+def main():
+    response = update_kb(request)
+    rospy.loginfo(response)
+
+if __name__ == "__main__":
+    unittest.main()
