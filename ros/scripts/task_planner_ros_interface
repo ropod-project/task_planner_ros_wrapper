@@ -7,13 +7,16 @@ from __future__ import print_function
 
 import uuid
 import rospy
+from actionlib import SimpleActionServer
 
 from ropod.structs.task import TaskRequest
 from task_planner.metric_ff_interface import MetricFFInterface
 from task_planner.knowledge_base_interface import KnowledgeBaseInterface
 
-from task_planner_ros_wrapper.msg import *
-from task_planner_ros_wrapper.srv import *
+from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
+from task_planner_ros_wrapper.msg import TaskPlannerFluentValue, TaskPlannerPlanAction
+from task_planner_ros_wrapper.msg import TaskPlannerPlanResult
+from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerUpdateKB
 
 NODE = 'task_planner'
 
@@ -35,8 +38,8 @@ class TaskPlannerROSInterface():
 
         rospy.Service('~update_kb', TaskPlannerUpdateKB, self._service_update_kb_request)
         rospy.Service('~query_kb', TaskPlannerQueryKB, self._service_query_kb_request)
-        # TODO: initialise plan action server
-
+        self._plan_server = SimpleActionServer('~plan', TaskPlannerPlanAction, self._service_plan_request, False)
+        self._plan_server.start()
 
     def _service_update_kb_request(self, req):
         """Service request for updating task planner's knowledge base
@@ -57,6 +60,17 @@ class TaskPlannerROSInterface():
         """
         rospy.loginfo(req)
         return TaskPlannerQueryKBResponse()
+
+    def _service_plan_request(self, req):
+        """Service request for planning using task planner's planner interface
+
+        :req: TaskPlannerPlanGoal
+        :returns: None
+
+        """
+        rospy.loginfo(req)
+        response = TaskPlannerPlanResult()
+        self._plan_server.set_succeeded(response)
 
     def _add_task_request_related_objects_and_fluents(self, task_request,
                                                      robot_name, elevator_needed=False):

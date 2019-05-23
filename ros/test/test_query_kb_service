@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-This module is a test for TaskPlannerUpdateKB service. It creates a client for
+This module is a test for TaskPlannerQueryKB service. It creates a client for
 that service and checks the output based on the response.
 '''
 
@@ -79,10 +79,6 @@ class TestQueryKB(unittest.TestCase):
         self.assertIn(self.collection_name, db.list_collection_names())
         collection = db[self.collection_name]
         return collection
-
-def main():
-    response = update_kb(request)
-    rospy.loginfo(response)
 
 if __name__ == "__main__":
     unittest.main()

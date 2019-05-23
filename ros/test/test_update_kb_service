@@ -85,10 +85,5 @@ class TestUpdateKB(unittest.TestCase):
         collection = db['knowledge_base']
         return collection
         
-
-def main():
-    response = update_kb(request)
-    rospy.loginfo(response)
-
 if __name__ == "__main__":
     unittest.main()
