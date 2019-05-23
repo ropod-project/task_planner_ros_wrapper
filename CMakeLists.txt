@@ -6,13 +6,14 @@ project(task_planner_ros_wrapper)
 # ROS dependency
 ########################################################################
 find_package(catkin REQUIRED COMPONENTS
+  rospy
+  actionlib
   message_generation
   genmsg 
   actionlib_msgs 
-  actionlib
   std_msgs
   diagnostic_msgs
-  rospy
+  ropod_ros_msgs
 )
 
 include_directories(
@@ -47,9 +48,10 @@ generate_messages(
   std_msgs
   actionlib_msgs
   diagnostic_msgs
+  ropod_ros_msgs
 )
 
 catkin_package(CATKIN_DEPENDS
-  message_runtime std_msgs actionlib_msgs diagnostic_msgs
+  message_runtime std_msgs actionlib_msgs diagnostic_msgs ropod_ros_msgs
 )
 
