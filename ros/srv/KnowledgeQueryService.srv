@@ -1,0 +1,7 @@
+# symbolic model query (1/1)
+
+KnowledgeItem[] knowledge
+---
+bool all_true
+bool[] results
+KnowledgeItem[] false_knowledge
