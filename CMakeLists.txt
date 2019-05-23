@@ -26,6 +26,7 @@ add_message_files(
   FILES
   TaskPlannerPredicate.msg
   TaskPlannerFluent.msg
+  TaskPlannerFluentValue.msg
 )
 
 add_service_files(
