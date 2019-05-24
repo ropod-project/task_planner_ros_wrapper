@@ -16,6 +16,8 @@ from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
 from task_planner_ros_wrapper.srv import TaskPlannerUpdateKB, TaskPlannerUpdateKBRequest
 from diagnostic_msgs.msg import KeyValue
 
+from task_planner.knowledge_base_interface import Predicate, Fluent
+
 class TestUpdateKB(unittest.TestCase):
 
     """Test TaskPlannerUpdateKB service."""
@@ -46,17 +48,20 @@ class TestUpdateKB(unittest.TestCase):
 
     def test_add_predicates(self):
         request = TaskPlannerUpdateKBRequest()
-        predicate = TaskPlannerPredicate(
-            name='on', 
-            params=[
-                KeyValue(key='computer', value='laptop'), 
-                KeyValue(key='table', value='work-desk')
-            ])
+        predicates = self._get_dummy_predicates()
+        request.facts_to_add = predicates
         response = self.update_kb(request)
         self.assertTrue(response.success)
-        collection = self.assert_and_get_collection()
-        predicate = collection.find_one()
-        print(predicate)
+        collection = self._assert_and_get_collection()
+        predicate_cursor = collection.find()
+        predicate_list = [predicate for predicate in predicate_cursor]
+        self.assertEqual(len(predicates), len(predicate_list))
+        # for ros_predicate, predicate in zip(predicates, predicate_list):
+        #     self.assertEqual(predicate.type, 'predicate')
+        #     self.assertEqual(ros_predicate.name, predicate['name'])
+        #     for ros_param, param in zip(ros_predicate.params predicate.params:
+        print(predicates)
+        print(predicate_list)
 
     def test_remove_predicates(self):
         # TODO
@@ -78,12 +83,30 @@ class TestUpdateKB(unittest.TestCase):
         # TODO
         pass
 
-    def assert_and_get_collection(self):
+    def _assert_and_get_collection(self):
         self.assertIn(self.db_name, self.client.list_database_names())
         db = self.client[self.db_name]
         self.assertIn('knowledge_base', db.list_collection_names())
         collection = db['knowledge_base']
         return collection
+
+    def _get_dummy_predicates(self):
+        predicates = []
+        predicate = TaskPlannerPredicate(
+            name='on', 
+            params=[
+                KeyValue(key='computer', value='laptop'), 
+                KeyValue(key='table', value='work-desk')
+            ])
+        predicates.append(predicate)
+        predicate = TaskPlannerPredicate(
+            name='at', 
+            params=[
+                KeyValue(key='robot', value='ropod'), 
+                KeyValue(key='location', value='Bonn')
+            ])
+        predicates.append(predicate)
+        return predicates
         
 if __name__ == "__main__":
     unittest.main()

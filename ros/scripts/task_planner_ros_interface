@@ -18,6 +18,8 @@ from task_planner_ros_wrapper.msg import TaskPlannerFluentValue, TaskPlannerPlan
 from task_planner_ros_wrapper.msg import TaskPlannerPlanResult
 from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerUpdateKB
 
+from task_planner_ros_wrapper.update_kb_handler import UpdateKBHandler
+
 NODE = 'task_planner'
 
 class TaskPlannerROSInterface():
@@ -37,6 +39,7 @@ class TaskPlannerROSInterface():
         print("initialised planner")
 
         rospy.Service('~update_kb', TaskPlannerUpdateKB, self._service_update_kb_request)
+        self._update_kb_handler = UpdateKBHandler(self.kb_interface)
         rospy.Service('~query_kb', TaskPlannerQueryKB, self._service_query_kb_request)
         self._plan_server = SimpleActionServer('~plan', TaskPlannerPlanAction, self._service_plan_request, False)
         self._plan_server.start()
@@ -48,8 +51,7 @@ class TaskPlannerROSInterface():
         :returns: TaskPlannerUpdateKBResponse
 
         """
-        rospy.loginfo(req)
-        return TaskPlannerUpdateKBResponse()
+        return self._update_kb_handler.get_safe_response(req)
 
     def _service_query_kb_request(self, req):
         """Service request for querying task planner's knowledge base
