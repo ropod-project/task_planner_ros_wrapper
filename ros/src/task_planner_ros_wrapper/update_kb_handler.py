@@ -18,20 +18,22 @@ class UpdateKBHandler():
         self.kb_interface = kb_interface
 
     def get_safe_response(self, req):
-        """TODO
+        """Handle individual parts of the update process within try block.
 
         :req: TaskPlannerUpdateKBRequest
         :returns: TaskPlannerUpdateKBResponse
 
         """
-        rospy.loginfo(req)
         success = True
-        success = success and self._handle_facts_to_add(req.facts_to_add)
-        success = success and self._handle_facts_to_remove(req.facts_to_remove)
-        success = success and self._handle_fluents_to_add(req.fluents_to_add)
-        success = success and self._handle_fluents_to_remove(req.fluents_to_remove)
-        success = success and self._handle_goals_to_add(req.goals_to_add)
-        success = success and self._handle_goals_to_remove(req.goals_to_remove)
+        try:
+            success = success and self._handle_facts_to_add(req.facts_to_add)
+            success = success and self._handle_facts_to_remove(req.facts_to_remove)
+            success = success and self._handle_fluents_to_add(req.fluents_to_add)
+            success = success and self._handle_fluents_to_remove(req.fluents_to_remove)
+            success = success and self._handle_goals_to_add(req.goals_to_add)
+            success = success and self._handle_goals_to_remove(req.goals_to_remove)
+        except Exception as e:
+            pass
         return TaskPlannerUpdateKBResponse(success=success)
         
     def _handle_facts_to_add(self, facts):
@@ -41,7 +43,6 @@ class UpdateKBHandler():
         :returns: bool
 
         """
-        rospy.loginfo(facts)
         if not facts:
             return True
         return self.kb_interface.insert_facts(
@@ -54,7 +55,10 @@ class UpdateKBHandler():
         :returns: bool
 
         """
-        return True
+        if not facts:
+            return True
+        return self.kb_interface.remove_facts(
+            [Converter.predicate_ros_to_tuple(fact) for fact in facts])
 
     def _handle_fluents_to_add(self, fluents):
         """Add all fluents to kb
@@ -63,7 +67,10 @@ class UpdateKBHandler():
         :returns: bool
 
         """
-        return True
+        if not fluents:
+            return True
+        return self.kb_interface.insert_fluents(
+            [Converter.fluent_ros_to_tuple(fluent) for fluent in fluents])
 
     def _handle_fluents_to_remove(self, fluents):
         """Remove all fluents from kb
@@ -72,7 +79,11 @@ class UpdateKBHandler():
         :returns: bool
 
         """
-        return True
+        if not fluents:
+            return True
+        success = self.kb_interface.remove_fluents(
+            [Converter.fluent_ros_to_tuple(fluent) for fluent in fluents])
+        return success
 
     def _handle_goals_to_add(self, goals):
         """Add all goals to kb
@@ -81,7 +92,10 @@ class UpdateKBHandler():
         :returns: bool
 
         """
-        return True
+        if not goals:
+            return True
+        return self.kb_interface.insert_goals(
+            [Converter.predicate_ros_to_tuple(goal) for goal in goals])
 
     def _handle_goals_to_remove(self, goals):
         """Remove all goals from kb
@@ -90,4 +104,7 @@ class UpdateKBHandler():
         :returns: bool
 
         """
-        return True
+        if not goals:
+            return True
+        return self.kb_interface.remove_goals(
+            [Converter.predicate_ros_to_tuple(goal) for goal in goals])

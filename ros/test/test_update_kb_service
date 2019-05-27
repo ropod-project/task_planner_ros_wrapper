@@ -16,6 +16,8 @@ from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
 from task_planner_ros_wrapper.srv import TaskPlannerUpdateKB, TaskPlannerUpdateKBRequest
 from diagnostic_msgs.msg import KeyValue
 
+from task_planner_ros_wrapper.converter import Converter
+
 from task_planner.knowledge_base_interface import Predicate, Fluent
 
 class TestUpdateKB(unittest.TestCase):
@@ -30,14 +32,14 @@ class TestUpdateKB(unittest.TestCase):
         rospy.init_node(NODE)
         cls.service_name = '/ropod_task_planning/task_planner/update_kb'
         cls.db_name = 'ropod_kb_ros'
+        cls.collection_name = 'knowledge_base'
+        cls.goal_collection_name = 'goals'
         cls.client = pm.MongoClient()
 
     def setUp(self):
         """Get service proxy
         """
-        print("waiting for service")
-        rospy.wait_for_service(self.service_name)
-        print("Got service")
+        rospy.wait_for_service(self.service_name, timeout=10.0)
         self.update_kb = rospy.ServiceProxy(
             self.service_name,
             TaskPlannerUpdateKB)
@@ -48,65 +50,139 @@ class TestUpdateKB(unittest.TestCase):
 
     def test_add_predicates(self):
         request = TaskPlannerUpdateKBRequest()
-        predicates = self._get_dummy_predicates()
-        request.facts_to_add = predicates
+        input_predicates = self._get_dummy_predicates()
+        ros_predicates = [Converter.predicate_obj_to_ros(predicate) for predicate in input_predicates]
+        request.facts_to_add = ros_predicates
         response = self.update_kb(request)
+
         self.assertTrue(response.success)
-        collection = self._assert_and_get_collection()
+        collection = self._assert_and_get_collection(self.collection_name)
         predicate_cursor = collection.find()
-        predicate_list = [predicate for predicate in predicate_cursor]
-        self.assertEqual(len(predicates), len(predicate_list))
-        # for ros_predicate, predicate in zip(predicates, predicate_list):
-        #     self.assertEqual(predicate.type, 'predicate')
-        #     self.assertEqual(ros_predicate.name, predicate['name'])
-        #     for ros_param, param in zip(ros_predicate.params predicate.params:
-        print(predicates)
-        print(predicate_list)
+        output_predicates = [Predicate.from_dict(predicate) for predicate in predicate_cursor]
+        self.assertEqual(len(input_predicates), len(output_predicates))
+        for input_predicate, output_predicate in zip(input_predicates, output_predicates):
+            self.assertEqual(input_predicate, output_predicate)
 
     def test_remove_predicates(self):
-        # TODO
-        pass
+        input_predicates = self._get_dummy_predicates()
+        collection = self.client[self.db_name][self.collection_name]
+        collection.insert_many([predicate.to_dict() for predicate in input_predicates])
+
+        request = TaskPlannerUpdateKBRequest()
+        ros_predicates = [Converter.predicate_obj_to_ros(predicate) for predicate in input_predicates]
+        request.facts_to_remove = ros_predicates
+        response = self.update_kb(request)
+
+        self.assertTrue(response.success)
+        collection = self._assert_and_get_collection(self.collection_name)
+        predicate_cursor = collection.find()
+        output_predicates = [Predicate.from_dict(predicate) for predicate in predicate_cursor]
+        self.assertEqual(len(output_predicates), 0)
 
     def test_add_fluents(self):
-        # TODO
-        pass
+        request = TaskPlannerUpdateKBRequest()
+        input_fluents = self._get_dummy_fluents()
+        ros_fluents = [Converter.fluent_obj_to_ros(fluent) for fluent in input_fluents]
+        request.fluents_to_add = ros_fluents
+        response = self.update_kb(request)
+
+        self.assertTrue(response.success)
+        collection = self._assert_and_get_collection(self.collection_name)
+        fluent_cursor = collection.find()
+        output_fluents = [Fluent.from_dict(fluent) for fluent in fluent_cursor]
+        self.assertEqual(len(input_fluents), len(output_fluents))
+        for input_fluent, output_fluent in zip(input_fluents, output_fluents):
+            self.assertEqual(input_fluent, output_fluent)
         
     def test_remove_fluents(self):
-        # TODO
-        pass
+        input_fluents = self._get_dummy_fluents()
+        collection = self.client[self.db_name][self.collection_name]
+        collection.insert_many([fluent.to_dict() for fluent in input_fluents])
+
+        request = TaskPlannerUpdateKBRequest()
+        ros_fluents = [Converter.fluent_obj_to_ros(fluent) for fluent in input_fluents]
+        request.fluents_to_remove = ros_fluents
+        response = self.update_kb(request)
+
+        self.assertTrue(response.success)
+        collection = self._assert_and_get_collection(self.collection_name)
+        fluent_cursor = collection.find()
+        output_fluents = [Fluent.from_dict(fluent) for fluent in fluent_cursor]
+        self.assertEqual(len(output_fluents), 0)
         
     def test_add_goals(self):
-        # TODO
-        pass
-        
-    def test_remove_goals(self):
-        # TODO
-        pass
+        request = TaskPlannerUpdateKBRequest()
+        input_predicates = self._get_dummy_predicates()
+        ros_predicates = [Converter.predicate_obj_to_ros(predicate) for predicate in input_predicates]
+        request.goals_to_add = ros_predicates
+        response = self.update_kb(request)
 
-    def _assert_and_get_collection(self):
+        self.assertTrue(response.success)
+        collection = self._assert_and_get_collection(self.goal_collection_name)
+        predicate_cursor = collection.find()
+        output_predicates = [Predicate.from_dict(predicate) for predicate in predicate_cursor]
+        self.assertEqual(len(input_predicates), len(output_predicates))
+        for input_predicate, output_predicate in zip(input_predicates, output_predicates):
+            self.assertEqual(input_predicate, output_predicate)
+
+    def test_remove_goals(self):
+        input_predicates = self._get_dummy_predicates()
+        collection = self.client[self.db_name][self.goal_collection_name]
+        collection.insert_many([predicate.to_dict() for predicate in input_predicates])
+        
+        request = TaskPlannerUpdateKBRequest()
+        ros_predicates = [Converter.predicate_obj_to_ros(predicate) for predicate in input_predicates]
+        request.goals_to_remove = ros_predicates
+        response = self.update_kb(request)
+
+        self.assertTrue(response.success)
+        collection = self._assert_and_get_collection(self.goal_collection_name)
+        predicate_cursor = collection.find()
+        output_predicates = [Predicate.from_dict(predicate) for predicate in predicate_cursor]
+        self.assertEqual(len(output_predicates), 0)
+
+    def _assert_and_get_collection(self, collection_name):
         self.assertIn(self.db_name, self.client.list_database_names())
         db = self.client[self.db_name]
-        self.assertIn('knowledge_base', db.list_collection_names())
-        collection = db['knowledge_base']
+        self.assertIn(collection_name, db.list_collection_names())
+        collection = db[collection_name]
         return collection
 
     def _get_dummy_predicates(self):
         predicates = []
-        predicate = TaskPlannerPredicate(
-            name='on', 
-            params=[
-                KeyValue(key='computer', value='laptop'), 
-                KeyValue(key='table', value='work-desk')
-            ])
-        predicates.append(predicate)
-        predicate = TaskPlannerPredicate(
-            name='at', 
-            params=[
-                KeyValue(key='robot', value='ropod'), 
-                KeyValue(key='location', value='Bonn')
-            ])
-        predicates.append(predicate)
+        temp_dict = {
+            'name':'on',
+            'params':[
+                {'name':'computer', 'value':'laptop'}, 
+                {'name':'table', 'value':'work-desk'}
+                ]}
+        predicates.append(Predicate.from_dict(temp_dict))
+        temp_dict = {
+            'name':'at',
+            'params':[
+                {'name':'robot', 'value':'ropod'}, 
+                {'name':'location', 'value':'Bonn'}
+                ]}
+        predicates.append(Predicate.from_dict(temp_dict))
         return predicates
+
+    def _get_dummy_fluents(self):
+        fluents = []
+        temp_dict = {
+            'name':'table_height',
+            'value': 1,
+            'params':[
+                {'name':'table', 'value':'work-desk'}
+                ]}
+        fluents.append(Fluent.from_dict(temp_dict))
+        temp_dict = {
+            'name':'at',
+            'value': 'BRSU',
+            'params':[
+                {'name':'robot', 'value':'ropod'}, 
+                ]}
+        fluents.append(Fluent.from_dict(temp_dict))
+        return fluents
         
 if __name__ == "__main__":
     unittest.main()
