@@ -3,14 +3,13 @@
 '''
 
 from __future__ import print_function
-import rospy
 from task_planner_ros_wrapper.msg import TaskPlannerPlanGoal, TaskPlannerPlanResult
 from task_planner_ros_utils.converter import Converter
 
 class PlanActionHandler():
 
     """Handles TaskPlannerPlan action requests.
-    
+
     :planner: TaskPlannerInterface object or its children (for example MetricFFInterface)
     """
 
@@ -29,7 +28,7 @@ class PlanActionHandler():
         try:
             plan_found, action_objs = self.planner.plan(
                 Converter.task_request_ros_to_obj(req.task_request),
-                req.robot_name, 
+                req.robot_name,
                 [Converter.predicate_ros_to_obj(goal) for goal in req.task_goals])
             actions = [Converter.action_obj_to_ros(action) for action in action_objs]
         except Exception as e:

@@ -6,20 +6,17 @@ that action and checks the result based on the response.
 
 from __future__ import print_function
 
-NODE = 'test_task_planner_plan'
-
-import rospy
 import unittest
+import rospy
 import pymongo as pm
 from actionlib import SimpleActionClient
 
-from ropod.structs.task import TaskRequest
-from ropod_ros_msgs.msg import TaskRequest as TaskRequestROS
-from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
 from task_planner_ros_wrapper.msg import TaskPlannerPlanAction, TaskPlannerPlanGoal
-from diagnostic_msgs.msg import KeyValue
 from task_planner_ros_utils.converter import Converter
+from ropod.structs.task import TaskRequest
 from task_planner.knowledge_base_interface import Predicate, Fluent
+
+NODE = 'test_task_planner_plan'
 
 class TestTaskPlannerPlan(unittest.TestCase):
 
@@ -39,7 +36,7 @@ class TestTaskPlannerPlan(unittest.TestCase):
         """Get service proxy
         """
         self.client = SimpleActionClient(self.action_name, TaskPlannerPlanAction)
-        connected = self.client.wait_for_server()
+        self.client.wait_for_server()
 
     @classmethod
     def tearDownClass(cls):
@@ -49,14 +46,17 @@ class TestTaskPlannerPlan(unittest.TestCase):
         cls.mongo_client.drop_database(cls.db_name)
 
     def test_plan(self):
+        '''Test plan functionality. Creates task request, add knowledge to mongo
+        and checks if the actions are correct or not
+        '''
         task_request = self._get_dummy_task_request()
         robot_name = 'frank'
         self._add_task_request_related_objects_and_fluents(task_request, robot_name)
         goals = self._get_goals(task_request, robot_name)
         req = TaskPlannerPlanGoal(
-            task_request = Converter.task_request_obj_to_ros(task_request),
-            robot_name = robot_name,
-            task_goals = [Converter.predicate_obj_to_ros(goal) for goal in goals])
+            task_request=Converter.task_request_obj_to_ros(task_request),
+            robot_name=robot_name,
+            task_goals=[Converter.predicate_obj_to_ros(goal) for goal in goals])
         self.client.send_goal(req)
         self.client.wait_for_result(timeout=rospy.Duration(10))
         result = self.client.get_result()
@@ -82,7 +82,7 @@ class TestTaskPlannerPlan(unittest.TestCase):
         temp_dict = {
             'name':'load_at',
             'params':[
-                {'name':'load', 'value':task_request.load_id}, 
+                {'name':'load', 'value':task_request.load_id},
                 {'name':'loc', 'value':task_request.delivery_pose.name}
                 ]}
         task_goals.append(Predicate.from_dict(temp_dict))

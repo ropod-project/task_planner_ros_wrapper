@@ -6,19 +6,17 @@ that service and checks the output based on the response.
 
 from __future__ import print_function
 
-NODE = 'test_task_planner_query_kb'
-
-import rospy
 import unittest
+import rospy
 import pymongo as pm
 
-from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
 from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerQueryKBRequest
-from diagnostic_msgs.msg import KeyValue
 
 from task_planner_ros_utils.converter import Converter
 
 from task_planner.knowledge_base_interface import Predicate, Fluent
+
+NODE = 'test_task_planner_query_kb'
 
 class TestQueryKB(unittest.TestCase):
 
@@ -85,9 +83,9 @@ class TestQueryKB(unittest.TestCase):
             predicate_name=predicates[0].name)
         response = self.query_kb(request)
         self.assertGreater(len(response.predicate_assertions), 0)
-        self.assertEqual(predicates[0], 
+        self.assertEqual(predicates[0],
                          Converter.predicate_ros_to_obj(response.predicate_assertions[0]))
-        
+
     def test_get_fluent_assertions(self):
         fluents = self._get_dummy_fluents()
         request = TaskPlannerQueryKBRequest(
@@ -108,9 +106,9 @@ class TestQueryKB(unittest.TestCase):
 
     def assert_and_get_collection(self):
         self.assertIn(self.db_name, self.client.list_database_names())
-        db = self.client[self.db_name]
-        self.assertIn(self.collection_name, db.list_collection_names())
-        collection = db[self.collection_name]
+        data_base = self.client[self.db_name]
+        self.assertIn(self.collection_name, data_base.list_collection_names())
+        collection = data_base[self.collection_name]
         return collection
 
     def _get_dummy_predicates(self):
@@ -118,14 +116,14 @@ class TestQueryKB(unittest.TestCase):
         temp_dict = {
             'name':'on',
             'params':[
-                {'name':'computer', 'value':'laptop'}, 
+                {'name':'computer', 'value':'laptop'},
                 {'name':'table', 'value':'work-desk'}
                 ]}
         predicates.append(Predicate.from_dict(temp_dict))
         temp_dict = {
             'name':'at',
             'params':[
-                {'name':'robot', 'value':'ropod'}, 
+                {'name':'robot', 'value':'ropod'},
                 {'name':'location', 'value':'Bonn'}
                 ]}
         predicates.append(Predicate.from_dict(temp_dict))
@@ -144,10 +142,10 @@ class TestQueryKB(unittest.TestCase):
             'name':'at',
             'value': 'BRSU',
             'params':[
-                {'name':'robot', 'value':'ropod'}, 
+                {'name':'robot', 'value':'ropod'},
                 ]}
         fluents.append(Fluent.from_dict(temp_dict))
         return fluents
-        
+
 if __name__ == "__main__":
     unittest.main()

@@ -3,21 +3,22 @@
 to their ROS versions, namely TaskPlannerPredicate and TaskPlannerFluent respectively
 and vice versa. Also possible to convert ROS versions to tuple.
 '''
+from ropod_ros_msgs.msg import TaskRequest as TaskRequestROS
+from ropod_ros_msgs.msg import Area as AreaROS
+from ropod_ros_msgs.msg import SubArea as SubAreaROS
+from ropod_ros_msgs.msg import Action as ActionROS
+from ropod_ros_msgs.msg import Elevator as ElevatorROS
+
 from diagnostic_msgs.msg import KeyValue
-from task_planner.knowledge_base_interface import Predicate, Fluent, PredicateParams
-from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent, TaskPlannerFluentValue
+from task_planner.knowledge_base_interface import Predicate, Fluent
+from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
+from task_planner_ros_wrapper.msg import TaskPlannerFluentValue
 
 from ropod.structs.task import TaskRequest
 from ropod.structs.action import Action
 from ropod.structs.area import Area, SubArea
 
-from ropod_ros_msgs.msg import TaskRequest as TaskRequestROS
-from ropod_ros_msgs.msg import Area as AreaROS
-from ropod_ros_msgs.msg import Area as SubAreaROS
-from ropod_ros_msgs.msg import Action as ActionROS
-from ropod_ros_msgs.msg import Elevator as ElevatorROS
-
-class Converter(object):
+class Converter():
 
     """Convert ROS versions of Predicate and Fluent to their respective obj and
     vice versa."""
@@ -30,7 +31,7 @@ class Converter(object):
 
         """
         return TaskPlannerPredicate(
-            name=predicate.name, 
+            name=predicate.name,
             params=[KeyValue(key=param.name, value=param.value) for param in predicate.params])
 
     @staticmethod
@@ -55,13 +56,13 @@ class Converter(object):
 
     @staticmethod
     def fluent_obj_to_ros(fluent):
-        """ 
+        """
         :fluent: Fluent
         :returns: TaskPlannerFluent
 
         """
         return TaskPlannerFluent(
-            name=fluent.name, 
+            name=fluent.name,
             params=[KeyValue(key=param.name, value=param.value) for param in fluent.params],
             value=Converter.fluent_value_obj_to_ros(fluent.value))
 
@@ -89,7 +90,7 @@ class Converter(object):
 
     @staticmethod
     def fluent_value_obj_to_ros(value):
-        """ 
+        """
         :value: string or int
         :returns: TaskPlannerFluentValue
 
@@ -98,22 +99,24 @@ class Converter(object):
             return TaskPlannerFluentValue(
                 data_type=TaskPlannerFluentValue.INT,
                 data=str(value))
-        elif isinstance(value, str):
+        if isinstance(value, str):
             return TaskPlannerFluentValue(
                 data_type=TaskPlannerFluentValue.STRING,
                 data=value)
+        return TaskPlannerFluentValue(data_type=TaskPlannerFluentValue.STRING)
 
     @staticmethod
     def fluent_value_ros_to_obj(fluent_value):
-        """ 
+        """
         :fluent_value: TaskPlannerFluentValue
         :returns: string or int
 
         """
         if fluent_value.data_type == TaskPlannerFluentValue.INT:
             return int(fluent_value.data)
-        elif fluent_value.data_type == TaskPlannerFluentValue.STRING:
+        if fluent_value.data_type == TaskPlannerFluentValue.STRING:
             return fluent_value.data
+        return fluent_value.data
 
     @staticmethod
     def task_request_obj_to_ros(task_request):
@@ -125,16 +128,16 @@ class Converter(object):
         return TaskRequestROS(
             load_type=task_request.load_type,
             load_id=task_request.load_id,
-            user_id = task_request.user_id,
-            earliest_start_time = task_request.earliest_start_time,
-            latest_start_time = task_request.latest_start_time,
-            priority = task_request.priority,
-            pickup_pose = Converter.area_obj_to_ros(task_request.pickup_pose),
-            delivery_pose = Converter.area_obj_to_ros(task_request.delivery_pose))
+            user_id=task_request.user_id,
+            earliest_start_time=task_request.earliest_start_time,
+            latest_start_time=task_request.latest_start_time,
+            priority=task_request.priority,
+            pickup_pose=Converter.area_obj_to_ros(task_request.pickup_pose),
+            delivery_pose=Converter.area_obj_to_ros(task_request.delivery_pose))
 
     @staticmethod
     def task_request_ros_to_obj(task_request):
-        """ 
+        """
         :task_request: ropod_ros_msgs/TaskRequest
         :returns: ropod.structs.task/TaskRequest
 
@@ -162,12 +165,11 @@ class Converter(object):
             name=area.name,
             type=area.type,
             floor_number=area.floor_number,
-            sub_areas = [Converter.sub_area_obj_to_ros(sub_area) for sub_area in area.sub_areas]
-            )
+            sub_areas=[Converter.sub_area_obj_to_ros(sub_area) for sub_area in area.sub_areas])
 
     @staticmethod
     def area_ros_to_obj(area):
-        """ 
+        """
         :area: ropod_ros_msgs/Area
         :returns: ropod.structs.area/Area
 
@@ -177,7 +179,8 @@ class Converter(object):
         area_obj.name = area.name
         area_obj.floor_number = area.floor_number
         area_obj.type = area.type
-        area_obj.sub_areas = [Converter.sub_area_ros_to_obj(sub_area) for sub_area in area.sub_areas]
+        area_obj.sub_areas = [Converter.sub_area_ros_to_obj(sub_area) \
+            for sub_area in area.sub_areas]
         return area_obj
 
     @staticmethod
@@ -195,7 +198,7 @@ class Converter(object):
 
     @staticmethod
     def sub_area_ros_to_obj(sub_area):
-        """ 
+        """
         :sub_area: ropod_ros_msgs/SubArea
         :returns: ropod.structs.area/SubArea
 
@@ -209,7 +212,7 @@ class Converter(object):
 
     @staticmethod
     def action_obj_to_ros(action):
-        """ 
+        """
         :action: ropod.structs.action/Action
         :returns: ropod_ros_msgs/Action
 
@@ -227,7 +230,7 @@ class Converter(object):
 
     @staticmethod
     def action_ros_to_obj(action):
-        """ 
+        """
         :action: ropod_ros_msgs/Action
         :returns: ropod.structs.action/Action
 

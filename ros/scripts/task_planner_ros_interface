@@ -5,22 +5,18 @@ ROS wrapper for task planner.
 
 from __future__ import print_function
 
-import uuid
 import rospy
 from actionlib import SimpleActionServer
 
-from ropod.structs.task import TaskRequest
-from task_planner.metric_ff_interface import MetricFFInterface
-from task_planner.knowledge_base_interface import KnowledgeBaseInterface
-
-from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
-from task_planner_ros_wrapper.msg import TaskPlannerFluentValue, TaskPlannerPlanAction
-from task_planner_ros_wrapper.msg import TaskPlannerPlanResult
+from task_planner_ros_wrapper.msg import TaskPlannerPlanAction
 from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerUpdateKB
 
 from task_planner_ros_wrapper.update_kb_handler import UpdateKBHandler
 from task_planner_ros_wrapper.query_kb_handler import QueryKBHandler
 from task_planner_ros_wrapper.plan_action_handler import PlanActionHandler
+
+from task_planner.metric_ff_interface import MetricFFInterface
+from task_planner.knowledge_base_interface import KnowledgeBaseInterface
 
 NODE = 'task_planner'
 
@@ -44,7 +40,8 @@ class TaskPlannerROSInterface():
         self._update_kb_handler = UpdateKBHandler(self.kb_interface)
         rospy.Service('~query_kb', TaskPlannerQueryKB, self._service_query_kb_request)
         self._query_kb_handler = QueryKBHandler(self.kb_interface)
-        self._plan_server = SimpleActionServer('~plan', TaskPlannerPlanAction, self._service_plan_request, False)
+        self._plan_server = SimpleActionServer('~plan', TaskPlannerPlanAction,
+                                               self._service_plan_request, False)
         self._plan_action_handler = PlanActionHandler(self.planner)
         self._plan_server.start()
 

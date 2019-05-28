@@ -3,14 +3,13 @@
 '''
 
 from __future__ import print_function
-import rospy
 from task_planner_ros_wrapper.srv import TaskPlannerUpdateKBResponse
 from task_planner_ros_utils.converter import Converter
 
 class UpdateKBHandler():
 
     """Handles TaskPlannerUpdateKB service requests.
-    
+
     :kb_interface: KnowledgeBaseInterface object
     """
 
@@ -35,7 +34,7 @@ class UpdateKBHandler():
         except Exception as e:
             pass
         return TaskPlannerUpdateKBResponse(success=success)
-        
+
     def _handle_facts_to_add(self, facts):
         """Add all predicates to kb
 
