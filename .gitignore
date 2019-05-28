@@ -6,3 +6,6 @@ tmp/plan_*
 
 # problem files
 tmp/problem_*
+
+# ignore build folder
+build/*
