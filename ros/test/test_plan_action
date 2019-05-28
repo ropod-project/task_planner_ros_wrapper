@@ -13,10 +13,13 @@ import unittest
 import pymongo as pm
 from actionlib import SimpleActionClient
 
-from ropod_ros_msgs.msg import TaskRequest
+from ropod.structs.task import TaskRequest
+from ropod_ros_msgs.msg import TaskRequest as TaskRequestROS
 from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
 from task_planner_ros_wrapper.msg import TaskPlannerPlanAction, TaskPlannerPlanGoal
 from diagnostic_msgs.msg import KeyValue
+from task_planner_ros_wrapper.converter import Converter
+from task_planner.knowledge_base_interface import Predicate, Fluent
 
 class TestTaskPlannerPlan(unittest.TestCase):
 
@@ -29,40 +32,106 @@ class TestTaskPlannerPlan(unittest.TestCase):
         rospy.init_node(NODE)
         cls.action_name = '/ropod_task_planning/task_planner/plan'
         cls.db_name = 'ropod_kb_ros'
-        client = pm.MongoClient()
+        cls.collection_name = 'knowledge_base'
+        cls.mongo_client = pm.MongoClient()
 
     def setUp(self):
         """Get service proxy
         """
         self.client = SimpleActionClient(self.action_name, TaskPlannerPlanAction)
-        print("waiting for service")
         connected = self.client.wait_for_server()
-        print("connected to server")
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         """Clear mongo db
         """
-        client = pm.MongoClient()
-        client.drop_database(self.db_name)
-        rospy.signal_shutdown("Test complete")
+        cls.mongo_client = pm.MongoClient()
+        cls.mongo_client.drop_database(cls.db_name)
 
     def test_plan(self):
-        task_request = TaskRequest() #TODO: initialise correctly
-        goals = self._get_goals()
+        task_request = self._get_dummy_task_request()
+        robot_name = 'frank'
+        self._add_task_request_related_objects_and_fluents(task_request, robot_name)
+        goals = self._get_goals(task_request, robot_name)
         req = TaskPlannerPlanGoal(
-            task_request = task_request,
-            robot_name = 'frank',
-            task_goals = goals)
+            task_request = Converter.task_request_obj_to_ros(task_request),
+            robot_name = robot_name,
+            task_goals = [Converter.predicate_obj_to_ros(goal) for goal in goals])
         self.client.send_goal(req)
         self.client.wait_for_result(timeout=rospy.Duration(10))
         result = self.client.get_result()
-        rospy.loginfo(result)
         self.assertTrue(result.plan_found)
-        print(result.actions)
+        self.assertEqual(len(result.actions), 3)
+        action_types = [action.type for action in result.actions]
+        self.assertSequenceEqual(action_types, ['DOCK', 'GOTO', 'UNDOCK'])
 
-    def _get_goals(self):
-        return list()
+    def _get_dummy_task_request(self):
+        task_request = TaskRequest()
+        task_request.load_id = 'pizza_001'
+        task_request.load_type = 'mobidik'
+        task_request.delivery_pose.id = 'C022'
+        task_request.delivery_pose.name = 'ropod_lab'
+        task_request.delivery_pose.floor_number = 0
+        task_request.pickup_pose.id = 'P001'
+        task_request.pickup_pose.name = 'pizza_shop'
+        task_request.pickup_pose.floor_number = 0
+        return task_request
+
+    def _get_goals(self, task_request, robot_name):
+        task_goals = []
+        temp_dict = {
+            'name':'load_at',
+            'params':[
+                {'name':'load', 'value':task_request.load_id}, 
+                {'name':'loc', 'value':task_request.delivery_pose.name}
+                ]}
+        task_goals.append(Predicate.from_dict(temp_dict))
+        temp_dict = {
+            'name':'empty_gripper',
+            'params':[
+                {'name':'bot', 'value':robot_name}
+                ]}
+        task_goals.append(Predicate.from_dict(temp_dict))
+        return task_goals
+
+    def _add_task_request_related_objects_and_fluents(self, task_request, robot_name):
+        """add objects and fluents to the kb using mongo client related to task
+        request.
+
+        :task_request: ropod.structs.task.TaskRequest
+        :robot_name: string
+        :returns: None
+
+        """
+        tuple_predicates = [('robot_at', [('bot', robot_name),
+                                          ('loc', task_request.pickup_pose.name)]),
+                            ('load_at', [('load', task_request.load_id),
+                                         ('loc', task_request.pickup_pose.name)]),
+                            ('empty_gripper', [('bot', robot_name)]),
+                            ('elevator_at', [('elevator', 'dummy_elevator'),
+                                             ('loc', 'elevator_loc_1')]),
+                            ('elevator_at', [('elevator', 'dummy_elevator'),
+                                             ('loc', 'elevator_loc_2')])]
+        predicates = [Predicate.from_tuple(tuple_predicate) for tuple_predicate in tuple_predicates]
+        collection = self.mongo_client[self.db_name][self.collection_name]
+        collection.insert_many([predicate.to_dict() for predicate in predicates])
+
+        tuple_fluents = [('location_floor',
+                          [('loc', task_request.pickup_pose.name)],
+                          task_request.pickup_pose.floor_number),
+                         ('location_floor',
+                          [('loc', task_request.delivery_pose.name)],
+                          task_request.delivery_pose.floor_number),
+                         ('robot_floor', [('bot', robot_name)],
+                          task_request.pickup_pose.floor_number),
+                         ('load_floor', [('load', task_request.load_id)],
+                          task_request.pickup_pose.floor_number),
+                         ('elevator_floor', [('elevator', 'elevator0')], 100),
+                         ('location_floor', [('loc', 'elevator_loc_1')], -1),
+                         ('location_floor', [('loc', 'elevator_loc_2')], 4)]
+        fluents = [Fluent.from_tuple(tuple_fluent) for tuple_fluent in tuple_fluents]
+        collection = self.mongo_client[self.db_name][self.collection_name]
+        collection.insert_many([fluent.to_dict() for fluent in fluents])
 
 if __name__ == "__main__":
     unittest.main()
