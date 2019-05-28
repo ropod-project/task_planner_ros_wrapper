@@ -16,7 +16,7 @@ from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
 from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerQueryKBRequest
 from diagnostic_msgs.msg import KeyValue
 
-from task_planner_ros_wrapper.converter import Converter
+from task_planner_ros_utils.converter import Converter
 
 from task_planner.knowledge_base_interface import Predicate, Fluent
 

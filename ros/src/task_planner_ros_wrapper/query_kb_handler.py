@@ -5,7 +5,7 @@
 from __future__ import print_function
 import rospy
 from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerQueryKBRequest, TaskPlannerQueryKBResponse
-from task_planner_ros_wrapper.converter import Converter
+from task_planner_ros_utils.converter import Converter
 
 class QueryKBHandler():
 
