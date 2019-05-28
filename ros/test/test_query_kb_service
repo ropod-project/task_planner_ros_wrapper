@@ -16,6 +16,10 @@ from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
 from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerQueryKBRequest
 from diagnostic_msgs.msg import KeyValue
 
+from task_planner_ros_wrapper.converter import Converter
+
+from task_planner.knowledge_base_interface import Predicate, Fluent
+
 class TestQueryKB(unittest.TestCase):
 
     """Test TaskPlannerQueryKB service."""
@@ -29,9 +33,21 @@ class TestQueryKB(unittest.TestCase):
         cls.service_name = '/ropod_task_planning/task_planner/query_kb'
         cls.db_name = 'ropod_kb_ros'
         cls.collection_name = 'knowledge_base'
+        cls.goal_collection_name = 'goals'
         cls.client = pm.MongoClient()
         cls.client.drop_database(cls.db_name)
-        # TODO: create a db to query
+
+        input_predicates = cls._get_dummy_predicates(cls)
+        collection = cls.client[cls.db_name][cls.collection_name]
+        collection.insert_many([predicate.to_dict() for predicate in input_predicates])
+
+        input_fluents = cls._get_dummy_fluents(cls)
+        collection = cls.client[cls.db_name][cls.collection_name]
+        collection.insert_many([fluent.to_dict() for fluent in input_fluents])
+
+        input_predicates = cls._get_dummy_predicates(cls)
+        collection = cls.client[cls.db_name][cls.goal_collection_name]
+        collection.insert_many([predicate.to_dict() for predicate in input_predicates])
 
     @classmethod
     def tearDownClass(cls):
@@ -40,9 +56,7 @@ class TestQueryKB(unittest.TestCase):
     def setUp(self):
         """Get service proxy
         """
-        print("waiting for service")
         rospy.wait_for_service(self.service_name)
-        print("Got service")
         self.query_kb = rospy.ServiceProxy(
             self.service_name,
             TaskPlannerQueryKB)
@@ -51,27 +65,46 @@ class TestQueryKB(unittest.TestCase):
         self.query_kb = None
 
     def test_get_predicate_names(self):
-        request = TaskPlannerQueryKBRequest()
+        request = TaskPlannerQueryKBRequest(
+            query_type=TaskPlannerQueryKBRequest.GET_PREDICATE_NAMES)
         response = self.query_kb(request)
-        collection = self.assert_and_get_collection()
-        predicate = collection.find_one()
-        print(predicate)
+        self.assertCountEqual(response.predicate_names, ['on', 'at']) # for python3
+        # self.assertItemsEqual(response.predicate_names, ['on', 'at']) # for python2
 
     def test_get_fluent_names(self):
-        # TODO
-        pass
+        request = TaskPlannerQueryKBRequest(
+            query_type=TaskPlannerQueryKBRequest.GET_FLUENT_NAMES)
+        response = self.query_kb(request)
+        self.assertCountEqual(response.fluent_names, ['table_height', 'at']) # for python3
+        # self.assertItemsEqual(response.fluent_names, ['table-height', 'at']) # for python2
 
     def test_get_predicate_assertions(self):
-        # TODO
-        pass
+        predicates = self._get_dummy_predicates()
+        request = TaskPlannerQueryKBRequest(
+            query_type=TaskPlannerQueryKBRequest.GET_PREDICATE_ASSERTIONS,
+            predicate_name=predicates[0].name)
+        response = self.query_kb(request)
+        self.assertGreater(len(response.predicate_assertions), 0)
+        self.assertEqual(predicates[0], 
+                         Converter.predicate_ros_to_obj(response.predicate_assertions[0]))
         
     def test_get_fluent_assertions(self):
-        # TODO
-        pass
-        
+        fluents = self._get_dummy_fluents()
+        request = TaskPlannerQueryKBRequest(
+            query_type=TaskPlannerQueryKBRequest.GET_FLUENT_ASSERTIONS)
+        response = self.query_kb(request)
+        self.assertGreater(len(response.fluent_assertions), 0)
+        response_fluents = [Converter.fluent_ros_to_obj(i) for i in response.fluent_assertions]
+        for fluent in fluents:
+            self.assertIn(fluent, response_fluents)
+
     def test_fluent_value(self):
-        # TODO
-        pass
+        fluents = self._get_dummy_fluents()
+        request = TaskPlannerQueryKBRequest(
+            query_type=TaskPlannerQueryKBRequest.GET_FLUENT_VALUE,
+            fluent=Converter.fluent_obj_to_ros(fluents[0]))
+        response = self.query_kb(request)
+        self.assertEqual(Converter.fluent_value_ros_to_obj(response.fluent_value), fluents[0].value)
 
     def assert_and_get_collection(self):
         self.assertIn(self.db_name, self.client.list_database_names())
@@ -80,5 +113,41 @@ class TestQueryKB(unittest.TestCase):
         collection = db[self.collection_name]
         return collection
 
+    def _get_dummy_predicates(self):
+        predicates = []
+        temp_dict = {
+            'name':'on',
+            'params':[
+                {'name':'computer', 'value':'laptop'}, 
+                {'name':'table', 'value':'work-desk'}
+                ]}
+        predicates.append(Predicate.from_dict(temp_dict))
+        temp_dict = {
+            'name':'at',
+            'params':[
+                {'name':'robot', 'value':'ropod'}, 
+                {'name':'location', 'value':'Bonn'}
+                ]}
+        predicates.append(Predicate.from_dict(temp_dict))
+        return predicates
+
+    def _get_dummy_fluents(self):
+        fluents = []
+        temp_dict = {
+            'name':'table_height',
+            'value': 1,
+            'params':[
+                {'name':'table', 'value':'work-desk'}
+                ]}
+        fluents.append(Fluent.from_dict(temp_dict))
+        temp_dict = {
+            'name':'at',
+            'value': 'BRSU',
+            'params':[
+                {'name':'robot', 'value':'ropod'}, 
+                ]}
+        fluents.append(Fluent.from_dict(temp_dict))
+        return fluents
+        
 if __name__ == "__main__":
     unittest.main()
