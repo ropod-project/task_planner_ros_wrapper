@@ -32,5 +32,5 @@ class PlanActionHandler():
                 [MessageConverter.predicate_ros_to_obj(goal) for goal in req.task_goals])
             actions = [MessageConverter.action_obj_to_ros(action) for action in action_objs]
         except Exception as e:
-            print(str(e))
+            rospy.logerr(str(e))
         return TaskPlannerPlanResult(plan_found=plan_found, actions=actions)

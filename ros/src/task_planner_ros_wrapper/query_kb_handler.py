@@ -35,7 +35,7 @@ class QueryKBHandler():
             if req.query_type == TaskPlannerQueryKBRequest.GET_FLUENT_VALUE:
                 return self._handle_get_fluent_value(req.fluent)
         except Exception as e:
-            print(str(e))
+            rospy.logerr(str(e))
         return TaskPlannerQueryKBResponse()
 
     def _handle_get_predicate_names(self):
