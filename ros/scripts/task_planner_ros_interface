@@ -11,8 +11,7 @@ from actionlib import SimpleActionServer
 from task_planner_ros_wrapper.msg import TaskPlannerPlanAction
 from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerUpdateKB
 
-from task_planner_ros_wrapper.update_kb_handler import UpdateKBHandler
-from task_planner_ros_wrapper.query_kb_handler import QueryKBHandler
+from task_planner_ros_wrapper.kb_handler import KBHandler
 from task_planner_ros_wrapper.plan_action_handler import PlanActionHandler
 
 from task_planner.metric_ff_interface import MetricFFInterface
@@ -39,13 +38,12 @@ class TaskPlannerROSInterface():
             debug=True)
         rospy.logdebug("Initialised planner")
 
+        self._kb_handler = KBHandler(self.kb_interface)
+        self._plan_action_handler = PlanActionHandler(self.planner)
         rospy.Service(update_kb_service_topic, TaskPlannerUpdateKB, self._service_update_kb_request)
-        self._update_kb_handler = UpdateKBHandler(self.kb_interface)
         rospy.Service(query_kb_service_topic, TaskPlannerQueryKB, self._service_query_kb_request)
-        self._query_kb_handler = QueryKBHandler(self.kb_interface)
         self._plan_server = SimpleActionServer(plan_action_topic, TaskPlannerPlanAction,
                                                self._service_plan_request, False)
-        self._plan_action_handler = PlanActionHandler(self.planner)
         self._plan_server.start()
 
         rospy.loginfo("Initialised TaskPlannerROSInterface")
@@ -57,7 +55,7 @@ class TaskPlannerROSInterface():
         :returns: TaskPlannerUpdateKBResponse
 
         """
-        return self._update_kb_handler.get_safe_response(req)
+        return self._kb_handler.get_safe_update_response(req)
 
     def _service_query_kb_request(self, req):
         """Service request for querying task planner's knowledge base
@@ -66,7 +64,7 @@ class TaskPlannerROSInterface():
         :returns: TaskPlannerQueryKBResponse
 
         """
-        return self._query_kb_handler.get_safe_response(req)
+        return self._kb_handler.get_safe_query_response(req)
 
     def _service_plan_request(self, req):
         """Service request for planning using task planner's planner interface
