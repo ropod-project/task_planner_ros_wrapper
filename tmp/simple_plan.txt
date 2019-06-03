@@ -1,0 +1,38 @@
+
+ff: parsing domain file
+domain 'HOSPITAL-TRANSPORTATION' defined
+ ... done.
+ff: parsing problem file
+problem 'ROPOD' defined
+ ... done.
+
+
+translating negated cond for predicate REQUESTED
+translating negated cond for predicate ROBOT_IN
+no metric specified.
+
+task contains conditional effects. turning off state domination.
+
+
+
+ff: search configuration is Enforced Hill-Climbing, if that fails then best-first search.
+Metric is plan length.
+NO COST MINIMIZATION (and no cost-minimizing relaxed plans).
+
+Cueing down from goal distance:    2 into depth [1][2]
+                                   1            [1]
+                                   0            
+
+ff: found legal plan as follows
+step    0: DOCK FRANK MOBIDIK_123 BRSU_L0_C5
+        1: GOTO FRANK BRSU_L0_C5 BRSU_L0_C0 MOBIDIK_123
+        2: UNDOCK FRANK MOBIDIK_123
+
+time spent:    0.00 seconds instantiating 29 easy, 0 hard action templates
+               0.00 seconds reachability analysis, yielding 16 facts and 18 actions
+               0.00 seconds creating final representation with 16 relevant facts, 6 relevant fluents
+               0.00 seconds computing LNF
+               0.00 seconds building connectivity graph
+               0.00 seconds searching, evaluating 4 states, to a max depth of 2
+               0.00 seconds total time
+

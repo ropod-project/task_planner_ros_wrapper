@@ -1,0 +1,12 @@
+# Action file for task planner's plan method
+
+# goal
+ropod_ros_msgs/TaskRequest task_request
+string robot_name
+Predicate[] task_goals
+---
+# result
+bool plan_found
+ropod_ros_msgs/Action[] actions
+---
+# feedback

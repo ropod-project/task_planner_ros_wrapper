@@ -1,0 +1,5 @@
+planner_params:
+    kb_database_name: ropod_kb_ros
+    planner_name: Metric-FF
+    domain_file: /opt/ropod/task-planner/config/task_domains/agaplesion/hospital_transportation.pddl
+    planner_cmd: /opt/ropod/task-planner/bin/Metric-FF -o DOMAIN -f PROBLEM -s 0

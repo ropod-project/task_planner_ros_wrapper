@@ -1,0 +1,33 @@
+# Service to query task planner's knowledge base
+
+
+# constants for query type
+uint8 GET_PREDICATE_NAMES = 0
+uint8 GET_FLUENT_NAMES = 1
+uint8 GET_PREDICATE_ASSERTIONS = 2
+uint8 GET_FLUENT_ASSERTIONS = 3
+uint8 GET_FLUENT_VALUE = 4
+
+uint8 query_type
+
+# for GET_PREDICATE_ASSERTIONS
+string predicate_name
+
+# for GET_FLUENT_VALUE
+Fluent fluent
+---
+
+# for GET_PREDICATE_NAMES
+string[] predicate_names
+
+# for GET_FLUENT_NAMES
+string[] fluent_names
+
+# for GET_PREDICATE_ASSERTIONS
+Predicate[] predicate_assertions
+
+# for GET_FLUENT_ASSERTIONS
+Fluent[] fluent_assertions
+
+# for GET_FLUENT_VALUE
+FluentValue fluent_value

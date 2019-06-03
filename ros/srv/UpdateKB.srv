@@ -1,0 +1,12 @@
+# Service to update task planner's knowledge base
+
+Predicate[] facts_to_add
+Predicate[] facts_to_remove
+
+Fluent[] fluents_to_add
+Fluent[] fluents_to_remove
+
+Predicate[] goals_to_add
+Predicate[] goals_to_remove
+---
+bool success

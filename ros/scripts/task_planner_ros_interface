@@ -1,0 +1,86 @@
+#! /usr/bin/env python3
+'''
+ROS wrapper for task planner.
+'''
+
+from __future__ import print_function
+
+import rospy
+from actionlib import SimpleActionServer
+
+from task_planner_ros_wrapper.msg import PlanAction
+from task_planner_ros_wrapper.srv import QueryKB, UpdateKB
+
+from task_planner_ros_wrapper.kb_handler import KBHandler
+from task_planner_ros_wrapper.plan_action_handler import PlanActionHandler
+
+from task_planner.metric_ff_interface import MetricFFInterface
+from task_planner.knowledge_base_interface import KnowledgeBaseInterface
+
+NODE = 'task_planner'
+
+class TaskPlannerROSInterface():
+
+    """ROS wrapper for task planner."""
+
+    def __init__(self):
+        planner_params = rospy.get_param('~planner_params', None)
+        plan_file_path = rospy.get_param('~plan_file_path', '/tmp')
+        update_kb_service_topic = rospy.get_param('~update_kb_service_topic', 'update_kb')
+        query_kb_service_topic = rospy.get_param('~query_kb_service_topic', 'query_kb')
+        plan_action_topic = rospy.get_param('~plan_action_topic', 'plan')
+        self.kb_interface = KnowledgeBaseInterface(planner_params['kb_database_name'])
+        self.planner = MetricFFInterface(
+            planner_params['kb_database_name'],
+            planner_params['domain_file'],
+            planner_params['planner_cmd'],
+            plan_file_path,
+            debug=True)
+        rospy.logdebug("Initialised planner")
+
+        self._kb_handler = KBHandler(self.kb_interface)
+        self._plan_action_handler = PlanActionHandler(self.planner)
+        rospy.Service(update_kb_service_topic, UpdateKB, self._service_update_kb_request)
+        rospy.Service(query_kb_service_topic, QueryKB, self._service_query_kb_request)
+        self._plan_server = SimpleActionServer(plan_action_topic, PlanAction,
+                                               self._service_plan_request, False)
+        self._plan_server.start()
+
+        rospy.loginfo("Initialised TaskPlannerROSInterface")
+
+    def _service_update_kb_request(self, req):
+        """Service request for updating task planner's knowledge base
+
+        :req: UpdateKBRequest
+        :returns: UpdateKBResponse
+
+        """
+        return self._kb_handler.get_safe_update_response(req)
+
+    def _service_query_kb_request(self, req):
+        """Service request for querying task planner's knowledge base
+
+        :req: QueryKBRequest
+        :returns: QueryKBResponse
+
+        """
+        return self._kb_handler.get_safe_query_response(req)
+
+    def _service_plan_request(self, req):
+        """Service request for planning using task planner's planner interface
+
+        :req: PlanGoal
+        :returns: None
+
+        """
+        response = self._plan_action_handler.get_safe_result(req)
+        if response.plan_found:
+            self._plan_server.set_succeeded(response)
+        else:
+            self._plan_server.set_aborted(response)
+
+if __name__ == "__main__":
+    rospy.init_node(NODE)
+    TASK_PLANNER_ROS_INTERFACE = TaskPlannerROSInterface()
+    rospy.spin()
+    rospy.loginfo("[%s] Stopped", NODE)

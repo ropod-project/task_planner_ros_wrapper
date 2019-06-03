@@ -1,0 +1,31 @@
+(define (problem ropod)
+    (:domain hospital-transportation)
+    (:objects
+        main_elevator - elevator
+        mobidik_123 - load
+        frank - robot
+        BRSU_L0_C5 BRSU_L0_A0_1 BRSU_L0_C0 BRSU_LO_A0_1 - location
+    )
+
+    (:init
+        (load_at mobidik_123 BRSU_L0_C5)
+        (robot_at frank BRSU_L0_C5)
+        (empty_gripper frank)
+        (elevator_at main_elevator BRSU_L0_A0_1)
+        (= (location_floor BRSU_L0_C5) 0)
+        (= (location_floor BRSU_L0_C0) 0)
+        (= (robot_floor frank) 0)
+        (= (load_floor mobidik_123) 0)
+        (= (location_floor BRSU_LO_A0_1) 0)
+        (= (elevator_floor main_elevator) -1)
+        (= (destination_floor main_elevator) -1)
+
+    )
+
+    (:goal
+        (and
+            (load_at mobidik_123 BRSU_L0_C0)
+            (empty_gripper frank)
+        )
+    )
+)
