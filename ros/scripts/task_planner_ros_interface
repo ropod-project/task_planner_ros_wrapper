@@ -8,8 +8,8 @@ from __future__ import print_function
 import rospy
 from actionlib import SimpleActionServer
 
-from task_planner_ros_wrapper.msg import TaskPlannerPlanAction
-from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerUpdateKB
+from task_planner_ros_wrapper.msg import PlanAction
+from task_planner_ros_wrapper.srv import QueryKB, UpdateKB
 
 from task_planner_ros_wrapper.kb_handler import KBHandler
 from task_planner_ros_wrapper.plan_action_handler import PlanActionHandler
@@ -40,9 +40,9 @@ class TaskPlannerROSInterface():
 
         self._kb_handler = KBHandler(self.kb_interface)
         self._plan_action_handler = PlanActionHandler(self.planner)
-        rospy.Service(update_kb_service_topic, TaskPlannerUpdateKB, self._service_update_kb_request)
-        rospy.Service(query_kb_service_topic, TaskPlannerQueryKB, self._service_query_kb_request)
-        self._plan_server = SimpleActionServer(plan_action_topic, TaskPlannerPlanAction,
+        rospy.Service(update_kb_service_topic, UpdateKB, self._service_update_kb_request)
+        rospy.Service(query_kb_service_topic, QueryKB, self._service_query_kb_request)
+        self._plan_server = SimpleActionServer(plan_action_topic, PlanAction,
                                                self._service_plan_request, False)
         self._plan_server.start()
 
@@ -51,8 +51,8 @@ class TaskPlannerROSInterface():
     def _service_update_kb_request(self, req):
         """Service request for updating task planner's knowledge base
 
-        :req: TaskPlannerUpdateKBRequest
-        :returns: TaskPlannerUpdateKBResponse
+        :req: UpdateKBRequest
+        :returns: UpdateKBResponse
 
         """
         return self._kb_handler.get_safe_update_response(req)
@@ -60,8 +60,8 @@ class TaskPlannerROSInterface():
     def _service_query_kb_request(self, req):
         """Service request for querying task planner's knowledge base
 
-        :req: TaskPlannerQueryKBRequest
-        :returns: TaskPlannerQueryKBResponse
+        :req: QueryKBRequest
+        :returns: QueryKBResponse
 
         """
         return self._kb_handler.get_safe_query_response(req)
@@ -69,7 +69,7 @@ class TaskPlannerROSInterface():
     def _service_plan_request(self, req):
         """Service request for planning using task planner's planner interface
 
-        :req: TaskPlannerPlanGoal
+        :req: PlanGoal
         :returns: None
 
         """

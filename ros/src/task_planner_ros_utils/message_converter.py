@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 '''Convert Predicate and Fluent Object defined in task_planner.KnowledgeBaseInterface
-to their ROS versions, namely ROSPredicate and ROSFluent respectively
+to their ROS versions, namely PredicateROS and FluentROS respectively
 and vice versa. Also possible to convert ROS versions to tuple.
 '''
 from ropod_ros_msgs.msg import TaskRequest as TaskRequestROS
@@ -11,8 +11,9 @@ from ropod_ros_msgs.msg import Elevator as ElevatorROS
 
 from diagnostic_msgs.msg import KeyValue
 from task_planner.knowledge_base_interface import Predicate, Fluent
-from task_planner_ros_wrapper.msg import ROSPredicate, ROSFluent
-from task_planner_ros_wrapper.msg import ROSFluentValue
+from task_planner_ros_wrapper.msg import Predicate as PredicateROS
+from task_planner_ros_wrapper.msg import Fluent as FluentROS
+from task_planner_ros_wrapper.msg import FluentValue as FluentROSValue
 
 from ropod.structs.task import TaskRequest
 from ropod.structs.action import Action
@@ -27,17 +28,17 @@ class MessageConverter():
     def predicate_obj_to_ros(predicate):
         """
         :predicate: Predicate
-        :returns: ROSPredicate
+        :returns: PredicateROS
 
         """
-        return ROSPredicate(
+        return PredicateROS(
             name=predicate.name,
             params=[KeyValue(key=param.name, value=param.value) for param in predicate.params])
 
     @staticmethod
     def predicate_ros_to_obj(predicate):
         """
-        :predicate: ROSPredicate
+        :predicate: PredicateROS
         :returns: Predicate
 
         """
@@ -48,7 +49,7 @@ class MessageConverter():
     @staticmethod
     def predicate_ros_to_tuple(predicate):
         """
-        :predicate: ROSPredicate
+        :predicate: PredicateROS
         :returns: tuple ('name', [('key', 'value')])
 
         """
@@ -58,10 +59,10 @@ class MessageConverter():
     def fluent_obj_to_ros(fluent):
         """
         :fluent: Fluent
-        :returns: ROSFluent
+        :returns: FluentROS
 
         """
-        return ROSFluent(
+        return FluentROS(
             name=fluent.name,
             params=[KeyValue(key=param.name, value=param.value) for param in fluent.params],
             value=MessageConverter.fluent_value_obj_to_ros(fluent.value))
@@ -69,7 +70,7 @@ class MessageConverter():
     @staticmethod
     def fluent_ros_to_obj(fluent):
         """
-        :predicate: ROSFluent
+        :predicate: FluentROS
         :returns: Fluent
 
         """
@@ -81,7 +82,7 @@ class MessageConverter():
     @staticmethod
     def fluent_ros_to_tuple(fluent):
         """
-        :predicate: ROSFluent
+        :predicate: FluentROS
         :returns: tuple ('name', [('key', 'value')], value)
 
         """
@@ -92,29 +93,29 @@ class MessageConverter():
     def fluent_value_obj_to_ros(value):
         """
         :value: string or int
-        :returns: ROSFluentValue
+        :returns: FluentROSValue
 
         """
         if isinstance(value, int):
-            return ROSFluentValue(
-                data_type=ROSFluentValue.INT,
+            return FluentROSValue(
+                data_type=FluentROSValue.INT,
                 data=str(value))
         if isinstance(value, str):
-            return ROSFluentValue(
-                data_type=ROSFluentValue.STRING,
+            return FluentROSValue(
+                data_type=FluentROSValue.STRING,
                 data=value)
-        return ROSFluentValue(data_type=ROSFluentValue.STRING)
+        return FluentROSValue(data_type=FluentROSValue.STRING)
 
     @staticmethod
     def fluent_value_ros_to_obj(fluent_value):
         """
-        :fluent_value: ROSFluentValue
+        :fluent_value: FluentROSValue
         :returns: string or int
 
         """
-        if fluent_value.data_type == ROSFluentValue.INT:
+        if fluent_value.data_type == FluentROSValue.INT:
             return int(fluent_value.data)
-        if fluent_value.data_type == ROSFluentValue.STRING:
+        if fluent_value.data_type == FluentROSValue.STRING:
             return fluent_value.data
         return fluent_value.data
 

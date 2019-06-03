@@ -14,7 +14,7 @@ uint8 query_type
 string predicate_name
 
 # for GET_FLUENT_VALUE
-ROSFluent fluent
+Fluent fluent
 ---
 
 # for GET_PREDICATE_NAMES
@@ -24,10 +24,10 @@ string[] predicate_names
 string[] fluent_names
 
 # for GET_PREDICATE_ASSERTIONS
-ROSPredicate[] predicate_assertions
+Predicate[] predicate_assertions
 
 # for GET_FLUENT_ASSERTIONS
-ROSFluent[] fluent_assertions
+Fluent[] fluent_assertions
 
 # for GET_FLUENT_VALUE
-ROSFluentValue fluent_value
+FluentValue fluent_value

@@ -1,14 +1,14 @@
 #! /usr/bin/env python3
-''' Handles TaskPlannerPlan action requests.
+''' Handles Plan action requests.
 '''
 
 from __future__ import print_function
-from task_planner_ros_wrapper.msg import TaskPlannerPlanGoal, TaskPlannerPlanResult
+from task_planner_ros_wrapper.msg import PlanGoal, PlanResult
 from task_planner_ros_utils.message_converter import MessageConverter
 
 class PlanActionHandler():
 
-    """Handles TaskPlannerPlan action requests.
+    """Handles Plan action requests.
 
     :planner: TaskPlannerInterface object or its children (for example MetricFFInterface)
     """
@@ -19,8 +19,8 @@ class PlanActionHandler():
     def get_safe_result(self, req):
         """Handle plan action call within try block.
 
-        :req: TaskPlannerPlanGoal
-        :returns: TaskPlannerPlanResult
+        :req: PlanGoal
+        :returns: PlanResult
 
         """
         plan_found = False
@@ -33,4 +33,4 @@ class PlanActionHandler():
             actions = [MessageConverter.action_obj_to_ros(action) for action in action_objs]
         except Exception as e:
             rospy.logerr(str(e))
-        return TaskPlannerPlanResult(plan_found=plan_found, actions=actions)
+        return PlanResult(plan_found=plan_found, actions=actions)

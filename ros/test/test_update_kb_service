@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-This module is a test for TaskPlannerUpdateKB service. It creates a client for
+This module is a test for UpdateKB service. It creates a client for
 that service and checks the output based on the response.
 '''
 
@@ -10,7 +10,7 @@ import unittest
 import rospy
 import pymongo as pm
 
-from task_planner_ros_wrapper.srv import TaskPlannerUpdateKB, TaskPlannerUpdateKBRequest
+from task_planner_ros_wrapper.srv import UpdateKB, UpdateKBRequest
 
 from task_planner_ros_utils.message_converter import MessageConverter
 
@@ -20,7 +20,7 @@ NODE = 'test_task_planner_update_kb'
 
 class TestUpdateKB(unittest.TestCase):
 
-    """Test TaskPlannerUpdateKB service."""
+    """Test UpdateKB service."""
 
     @classmethod
     def setUpClass(cls):
@@ -40,14 +40,14 @@ class TestUpdateKB(unittest.TestCase):
         rospy.wait_for_service(self.service_name, timeout=10.0)
         self.update_kb = rospy.ServiceProxy(
             self.service_name,
-            TaskPlannerUpdateKB)
+            UpdateKB)
 
     def tearDown(self):
         self.update_kb = None
         self.client.drop_database(self.db_name)
 
     def test_add_predicates(self):
-        request = TaskPlannerUpdateKBRequest()
+        request = UpdateKBRequest()
         input_predicates = self._get_dummy_predicates()
         ros_predicates = [MessageConverter.predicate_obj_to_ros(predicate) \
             for predicate in input_predicates]
@@ -67,7 +67,7 @@ class TestUpdateKB(unittest.TestCase):
         collection = self.client[self.db_name][self.collection_name]
         collection.insert_many([predicate.to_dict() for predicate in input_predicates])
 
-        request = TaskPlannerUpdateKBRequest()
+        request = UpdateKBRequest()
         ros_predicates = [MessageConverter.predicate_obj_to_ros(predicate) \
             for predicate in input_predicates]
         request.facts_to_remove = ros_predicates
@@ -80,7 +80,7 @@ class TestUpdateKB(unittest.TestCase):
         self.assertEqual(len(output_predicates), 0)
 
     def test_add_fluents(self):
-        request = TaskPlannerUpdateKBRequest()
+        request = UpdateKBRequest()
         input_fluents = self._get_dummy_fluents()
         ros_fluents = [MessageConverter.fluent_obj_to_ros(fluent) for fluent in input_fluents]
         request.fluents_to_add = ros_fluents
@@ -99,7 +99,7 @@ class TestUpdateKB(unittest.TestCase):
         collection = self.client[self.db_name][self.collection_name]
         collection.insert_many([fluent.to_dict() for fluent in input_fluents])
 
-        request = TaskPlannerUpdateKBRequest()
+        request = UpdateKBRequest()
         ros_fluents = [MessageConverter.fluent_obj_to_ros(fluent) for fluent in input_fluents]
         request.fluents_to_remove = ros_fluents
         response = self.update_kb(request)
@@ -111,7 +111,7 @@ class TestUpdateKB(unittest.TestCase):
         self.assertEqual(len(output_fluents), 0)
 
     def test_add_goals(self):
-        request = TaskPlannerUpdateKBRequest()
+        request = UpdateKBRequest()
         input_predicates = self._get_dummy_predicates()
         ros_predicates = [MessageConverter.predicate_obj_to_ros(predicate) \
             for predicate in input_predicates]
@@ -131,7 +131,7 @@ class TestUpdateKB(unittest.TestCase):
         collection = self.client[self.db_name][self.goal_collection_name]
         collection.insert_many([predicate.to_dict() for predicate in input_predicates])
 
-        request = TaskPlannerUpdateKBRequest()
+        request = UpdateKBRequest()
         ros_predicates = [MessageConverter.predicate_obj_to_ros(predicate) \
             for predicate in input_predicates]
         request.goals_to_remove = ros_predicates

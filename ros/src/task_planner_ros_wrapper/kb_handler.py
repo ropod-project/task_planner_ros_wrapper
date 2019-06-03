@@ -3,8 +3,8 @@
 '''
 
 from __future__ import print_function
-from task_planner_ros_wrapper.srv import TaskPlannerUpdateKBResponse
-from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerQueryKBRequest, TaskPlannerQueryKBResponse
+from task_planner_ros_wrapper.srv import UpdateKBResponse
+from task_planner_ros_wrapper.srv import QueryKB, QueryKBRequest, QueryKBResponse
 from task_planner_ros_utils.message_converter import MessageConverter
 
 class KBHandler():
@@ -20,8 +20,8 @@ class KBHandler():
     def get_safe_update_response(self, req):
         """Handle individual parts of the update process within try block.
 
-        :req: TaskPlannerUpdateKBRequest
-        :returns: TaskPlannerUpdateKBResponse
+        :req: UpdateKBRequest
+        :returns: UpdateKBResponse
 
         """
         success = True
@@ -34,29 +34,29 @@ class KBHandler():
             success = success and self._handle_goals_to_remove(req.goals_to_remove)
         except Exception as e:
             pass
-        return TaskPlannerUpdateKBResponse(success=success)
+        return UpdateKBResponse(success=success)
 
     def get_safe_query_response(self, req):
         """Handle a query based on the query type within try block
 
-        :req: TaskPlannerQueryKBRequest
-        :returns: TaskPlannerQueryKBResponse
+        :req: QueryKBRequest
+        :returns: QueryKBResponse
 
         """
         try:
-            if req.query_type == TaskPlannerQueryKBRequest.GET_PREDICATE_NAMES:
+            if req.query_type == QueryKBRequest.GET_PREDICATE_NAMES:
                 return self._handle_get_predicate_names()
-            if req.query_type == TaskPlannerQueryKBRequest.GET_FLUENT_NAMES:
+            if req.query_type == QueryKBRequest.GET_FLUENT_NAMES:
                 return self._handle_get_fluent_names()
-            if req.query_type == TaskPlannerQueryKBRequest.GET_PREDICATE_ASSERTIONS:
+            if req.query_type == QueryKBRequest.GET_PREDICATE_ASSERTIONS:
                 return self._handle_get_predicate_assertions(req.predicate_name)
-            if req.query_type == TaskPlannerQueryKBRequest.GET_FLUENT_ASSERTIONS:
+            if req.query_type == QueryKBRequest.GET_FLUENT_ASSERTIONS:
                 return self._handle_get_fluent_assertions()
-            if req.query_type == TaskPlannerQueryKBRequest.GET_FLUENT_VALUE:
+            if req.query_type == QueryKBRequest.GET_FLUENT_VALUE:
                 return self._handle_get_fluent_value(req.fluent)
         except Exception as e:
             rospy.logerr(str(e))
-        return TaskPlannerQueryKBResponse()
+        return QueryKBResponse()
 
     def _handle_facts_to_add(self, facts):
         """Add all predicates to kb
@@ -133,47 +133,47 @@ class KBHandler():
 
     def _handle_get_predicate_names(self):
         """
-        :returns: TaskPlannerQueryKBResponse
+        :returns: QueryKBResponse
 
         """
-        return TaskPlannerQueryKBResponse(predicate_names=self.kb_interface.get_predicate_names())
+        return QueryKBResponse(predicate_names=self.kb_interface.get_predicate_names())
 
     def _handle_get_fluent_names(self):
         """
-        :returns: TaskPlannerQueryKBResponse
+        :returns: QueryKBResponse
 
         """
-        return TaskPlannerQueryKBResponse(fluent_names=self.kb_interface.get_fluent_names())
+        return QueryKBResponse(fluent_names=self.kb_interface.get_fluent_names())
 
     def _handle_get_predicate_assertions(self, predicate_name):
         """
 
         :predicate_name: string
-        :returns: TaskPlannerQueryKBResponse
+        :returns: QueryKBResponse
 
         """
         if predicate_name == '':
             predicate_name = None
         predicate_assertions = [MessageConverter.predicate_obj_to_ros(predicate) \
                 for predicate in self.kb_interface.get_predicate_assertions(predicate_name)]
-        return TaskPlannerQueryKBResponse(predicate_assertions=predicate_assertions)
+        return QueryKBResponse(predicate_assertions=predicate_assertions)
 
     def _handle_get_fluent_assertions(self):
         """
-        :returns: TaskPlannerQueryKBResponse
+        :returns: QueryKBResponse
 
         """
         fluent_assertions = [MessageConverter.fluent_obj_to_ros(fluent) \
             for fluent in self.kb_interface.get_fluent_assertions()]
-        return TaskPlannerQueryKBResponse(fluent_assertions=fluent_assertions)
+        return QueryKBResponse(fluent_assertions=fluent_assertions)
 
     def _handle_get_fluent_value(self, fluent):
         """
 
         :fluent: task_planner/Fluent
-        :returns: TaskPlannerQueryKBResponse
+        :returns: QueryKBResponse
 
         """
         fluent_value = self.kb_interface.get_fluent_value(MessageConverter.fluent_ros_to_tuple(fluent))
         fluent_value_ros = MessageConverter.fluent_value_obj_to_ros(fluent_value)
-        return TaskPlannerQueryKBResponse(fluent_value=fluent_value_ros)
+        return QueryKBResponse(fluent_value=fluent_value_ros)

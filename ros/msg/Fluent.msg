@@ -7,4 +7,4 @@ string name
 diagnostic_msgs/KeyValue[] params
 
 # fluent value
-ROSFluentValue value
+FluentValue value

@@ -24,22 +24,22 @@ include_directories(
 add_message_files(
   DIRECTORY ros/msg
   FILES
-  ROSPredicate.msg
-  ROSFluent.msg
-  ROSFluentValue.msg
+  Predicate.msg
+  Fluent.msg
+  FluentValue.msg
 )
 
 add_service_files(
   DIRECTORY ros/srv
   FILES
-  TaskPlannerUpdateKB.srv
-  TaskPlannerQueryKB.srv
+  UpdateKB.srv
+  QueryKB.srv
 )
 
 add_action_files(
   DIRECTORY ros/action
   FILES
-  TaskPlannerPlan.action
+  Plan.action
 )
 
 catkin_python_setup()
