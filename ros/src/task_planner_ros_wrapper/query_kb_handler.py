@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerQueryKBRequest, TaskPlannerQueryKBResponse
-from task_planner_ros_utils.converter import Converter
+from task_planner_ros_utils.message_converter import MessageConverter
 
 class QueryKBHandler():
 
@@ -61,7 +61,7 @@ class QueryKBHandler():
         """
         if predicate_name == '':
             predicate_name = None
-        predicate_assertions = [Converter.predicate_obj_to_ros(predicate) \
+        predicate_assertions = [MessageConverter.predicate_obj_to_ros(predicate) \
                 for predicate in self.kb_interface.get_predicate_assertions(predicate_name)]
         return TaskPlannerQueryKBResponse(predicate_assertions=predicate_assertions)
 
@@ -70,7 +70,7 @@ class QueryKBHandler():
         :returns: TaskPlannerQueryKBResponse
 
         """
-        fluent_assertions = [Converter.fluent_obj_to_ros(fluent) \
+        fluent_assertions = [MessageConverter.fluent_obj_to_ros(fluent) \
             for fluent in self.kb_interface.get_fluent_assertions()]
         return TaskPlannerQueryKBResponse(fluent_assertions=fluent_assertions)
 
@@ -81,6 +81,6 @@ class QueryKBHandler():
         :returns: TaskPlannerQueryKBResponse
 
         """
-        fluent_value = self.kb_interface.get_fluent_value(Converter.fluent_ros_to_tuple(fluent))
-        fluent_value_ros = Converter.fluent_value_obj_to_ros(fluent_value)
+        fluent_value = self.kb_interface.get_fluent_value(MessageConverter.fluent_ros_to_tuple(fluent))
+        fluent_value_ros = MessageConverter.fluent_value_obj_to_ros(fluent_value)
         return TaskPlannerQueryKBResponse(fluent_value=fluent_value_ros)

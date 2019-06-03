@@ -12,7 +12,7 @@ import pymongo as pm
 
 from task_planner_ros_wrapper.srv import TaskPlannerQueryKB, TaskPlannerQueryKBRequest
 
-from task_planner_ros_utils.converter import Converter
+from task_planner_ros_utils.message_converter import MessageConverter
 
 from task_planner.knowledge_base_interface import Predicate, Fluent
 
@@ -84,7 +84,7 @@ class TestQueryKB(unittest.TestCase):
         response = self.query_kb(request)
         self.assertGreater(len(response.predicate_assertions), 0)
         self.assertEqual(predicates[0],
-                         Converter.predicate_ros_to_obj(response.predicate_assertions[0]))
+                         MessageConverter.predicate_ros_to_obj(response.predicate_assertions[0]))
 
     def test_get_fluent_assertions(self):
         fluents = self._get_dummy_fluents()
@@ -92,7 +92,7 @@ class TestQueryKB(unittest.TestCase):
             query_type=TaskPlannerQueryKBRequest.GET_FLUENT_ASSERTIONS)
         response = self.query_kb(request)
         self.assertGreater(len(response.fluent_assertions), 0)
-        response_fluents = [Converter.fluent_ros_to_obj(i) for i in response.fluent_assertions]
+        response_fluents = [MessageConverter.fluent_ros_to_obj(i) for i in response.fluent_assertions]
         for fluent in fluents:
             self.assertIn(fluent, response_fluents)
 
@@ -100,9 +100,9 @@ class TestQueryKB(unittest.TestCase):
         fluents = self._get_dummy_fluents()
         request = TaskPlannerQueryKBRequest(
             query_type=TaskPlannerQueryKBRequest.GET_FLUENT_VALUE,
-            fluent=Converter.fluent_obj_to_ros(fluents[0]))
+            fluent=MessageConverter.fluent_obj_to_ros(fluents[0]))
         response = self.query_kb(request)
-        self.assertEqual(Converter.fluent_value_ros_to_obj(response.fluent_value), fluents[0].value)
+        self.assertEqual(MessageConverter.fluent_value_ros_to_obj(response.fluent_value), fluents[0].value)
 
     def assert_and_get_collection(self):
         self.assertIn(self.db_name, self.client.list_database_names())

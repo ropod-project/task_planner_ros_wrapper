@@ -18,7 +18,7 @@ from ropod.structs.task import TaskRequest
 from ropod.structs.action import Action
 from ropod.structs.area import Area, SubArea
 
-class Converter():
+class MessageConverter():
 
     """Convert ROS versions of Predicate and Fluent to their respective obj and
     vice versa."""
@@ -64,7 +64,7 @@ class Converter():
         return TaskPlannerFluent(
             name=fluent.name,
             params=[KeyValue(key=param.name, value=param.value) for param in fluent.params],
-            value=Converter.fluent_value_obj_to_ros(fluent.value))
+            value=MessageConverter.fluent_value_obj_to_ros(fluent.value))
 
     @staticmethod
     def fluent_ros_to_obj(fluent):
@@ -76,7 +76,7 @@ class Converter():
         return Fluent.from_dict({
             'name': fluent.name,
             'params': [{'name':param.key, 'value':param.value} for param in fluent.params],
-            'value': Converter.fluent_value_ros_to_obj(fluent.value)})
+            'value': MessageConverter.fluent_value_ros_to_obj(fluent.value)})
 
     @staticmethod
     def fluent_ros_to_tuple(fluent):
@@ -86,7 +86,7 @@ class Converter():
 
         """
         return (fluent.name, [(param.key, param.value) for param in fluent.params], \
-                Converter.fluent_value_ros_to_obj(fluent.value))
+                MessageConverter.fluent_value_ros_to_obj(fluent.value))
 
     @staticmethod
     def fluent_value_obj_to_ros(value):
@@ -132,8 +132,8 @@ class Converter():
             earliest_start_time=task_request.earliest_start_time,
             latest_start_time=task_request.latest_start_time,
             priority=task_request.priority,
-            pickup_pose=Converter.area_obj_to_ros(task_request.pickup_pose),
-            delivery_pose=Converter.area_obj_to_ros(task_request.delivery_pose))
+            pickup_pose=MessageConverter.area_obj_to_ros(task_request.pickup_pose),
+            delivery_pose=MessageConverter.area_obj_to_ros(task_request.delivery_pose))
 
     @staticmethod
     def task_request_ros_to_obj(task_request):
@@ -148,8 +148,8 @@ class Converter():
         task_req_obj.user_id = task_request.user_id
         task_req_obj.earliest_start_time = task_request.earliest_start_time
         task_req_obj.latest_start_time = task_request.latest_start_time
-        task_req_obj.pickup_pose = Converter.area_ros_to_obj(task_request.pickup_pose)
-        task_req_obj.delivery_pose = Converter.area_ros_to_obj(task_request.delivery_pose)
+        task_req_obj.pickup_pose = MessageConverter.area_ros_to_obj(task_request.pickup_pose)
+        task_req_obj.delivery_pose = MessageConverter.area_ros_to_obj(task_request.delivery_pose)
         task_req_obj.priority = task_request.priority
         return task_req_obj
 
@@ -165,7 +165,7 @@ class Converter():
             name=area.name,
             type=area.type,
             floor_number=area.floor_number,
-            sub_areas=[Converter.sub_area_obj_to_ros(sub_area) for sub_area in area.sub_areas])
+            sub_areas=[MessageConverter.sub_area_obj_to_ros(sub_area) for sub_area in area.sub_areas])
 
     @staticmethod
     def area_ros_to_obj(area):
@@ -179,7 +179,7 @@ class Converter():
         area_obj.name = area.name
         area_obj.floor_number = area.floor_number
         area_obj.type = area.type
-        area_obj.sub_areas = [Converter.sub_area_ros_to_obj(sub_area) \
+        area_obj.sub_areas = [MessageConverter.sub_area_ros_to_obj(sub_area) \
             for sub_area in area.sub_areas]
         return area_obj
 
@@ -224,8 +224,8 @@ class Converter():
             estimated_duration=action.eta,
             start_floor=action.start_floor,
             goal_floor=action.goal_floor,
-            areas=[Converter.area_obj_to_ros(area) for area in action.areas],
-            sub_areas=[Converter.sub_area_obj_to_ros(sub_area) for sub_area in action.subareas],
+            areas=[MessageConverter.area_obj_to_ros(area) for area in action.areas],
+            sub_areas=[MessageConverter.sub_area_obj_to_ros(sub_area) for sub_area in action.subareas],
             elevator=ElevatorROS(elevator_id=action.elevator_id))
 
     @staticmethod
@@ -243,6 +243,6 @@ class Converter():
         action_obj.elevator_id = action.elevator.elevator_id
         action_obj.execution_status = action.execution_status
         action_obj.eta = action.estimated_duration
-        action_obj.areas = [Converter.area_ros_to_obj(area) for area in action.areas]
-        action_obj.subareas = [Converter.area_ros_to_obj(sub_area) for sub_area in action.sub_areas]
+        action_obj.areas = [MessageConverter.area_ros_to_obj(area) for area in action.areas]
+        action_obj.subareas = [MessageConverter.area_ros_to_obj(sub_area) for sub_area in action.sub_areas]
         return action_obj

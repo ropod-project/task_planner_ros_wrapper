@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 from task_planner_ros_wrapper.srv import TaskPlannerUpdateKBResponse
-from task_planner_ros_utils.converter import Converter
+from task_planner_ros_utils.message_converter import MessageConverter
 
 class UpdateKBHandler():
 
@@ -45,7 +45,7 @@ class UpdateKBHandler():
         if not facts:
             return True
         return self.kb_interface.insert_facts(
-            [Converter.predicate_ros_to_tuple(fact) for fact in facts])
+            [MessageConverter.predicate_ros_to_tuple(fact) for fact in facts])
 
     def _handle_facts_to_remove(self, facts):
         """Remove all predicates from kb
@@ -57,7 +57,7 @@ class UpdateKBHandler():
         if not facts:
             return True
         return self.kb_interface.remove_facts(
-            [Converter.predicate_ros_to_tuple(fact) for fact in facts])
+            [MessageConverter.predicate_ros_to_tuple(fact) for fact in facts])
 
     def _handle_fluents_to_add(self, fluents):
         """Add all fluents to kb
@@ -69,7 +69,7 @@ class UpdateKBHandler():
         if not fluents:
             return True
         return self.kb_interface.insert_fluents(
-            [Converter.fluent_ros_to_tuple(fluent) for fluent in fluents])
+            [MessageConverter.fluent_ros_to_tuple(fluent) for fluent in fluents])
 
     def _handle_fluents_to_remove(self, fluents):
         """Remove all fluents from kb
@@ -81,7 +81,7 @@ class UpdateKBHandler():
         if not fluents:
             return True
         success = self.kb_interface.remove_fluents(
-            [Converter.fluent_ros_to_tuple(fluent) for fluent in fluents])
+            [MessageConverter.fluent_ros_to_tuple(fluent) for fluent in fluents])
         return success
 
     def _handle_goals_to_add(self, goals):
@@ -94,7 +94,7 @@ class UpdateKBHandler():
         if not goals:
             return True
         return self.kb_interface.insert_goals(
-            [Converter.predicate_ros_to_tuple(goal) for goal in goals])
+            [MessageConverter.predicate_ros_to_tuple(goal) for goal in goals])
 
     def _handle_goals_to_remove(self, goals):
         """Remove all goals from kb
@@ -106,4 +106,4 @@ class UpdateKBHandler():
         if not goals:
             return True
         return self.kb_interface.remove_goals(
-            [Converter.predicate_ros_to_tuple(goal) for goal in goals])
+            [MessageConverter.predicate_ros_to_tuple(goal) for goal in goals])

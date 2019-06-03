@@ -12,7 +12,7 @@ import pymongo as pm
 
 from task_planner_ros_wrapper.srv import TaskPlannerUpdateKB, TaskPlannerUpdateKBRequest
 
-from task_planner_ros_utils.converter import Converter
+from task_planner_ros_utils.message_converter import MessageConverter
 
 from task_planner.knowledge_base_interface import Predicate, Fluent
 
@@ -49,7 +49,7 @@ class TestUpdateKB(unittest.TestCase):
     def test_add_predicates(self):
         request = TaskPlannerUpdateKBRequest()
         input_predicates = self._get_dummy_predicates()
-        ros_predicates = [Converter.predicate_obj_to_ros(predicate) \
+        ros_predicates = [MessageConverter.predicate_obj_to_ros(predicate) \
             for predicate in input_predicates]
         request.facts_to_add = ros_predicates
         response = self.update_kb(request)
@@ -68,7 +68,7 @@ class TestUpdateKB(unittest.TestCase):
         collection.insert_many([predicate.to_dict() for predicate in input_predicates])
 
         request = TaskPlannerUpdateKBRequest()
-        ros_predicates = [Converter.predicate_obj_to_ros(predicate) \
+        ros_predicates = [MessageConverter.predicate_obj_to_ros(predicate) \
             for predicate in input_predicates]
         request.facts_to_remove = ros_predicates
         response = self.update_kb(request)
@@ -82,7 +82,7 @@ class TestUpdateKB(unittest.TestCase):
     def test_add_fluents(self):
         request = TaskPlannerUpdateKBRequest()
         input_fluents = self._get_dummy_fluents()
-        ros_fluents = [Converter.fluent_obj_to_ros(fluent) for fluent in input_fluents]
+        ros_fluents = [MessageConverter.fluent_obj_to_ros(fluent) for fluent in input_fluents]
         request.fluents_to_add = ros_fluents
         response = self.update_kb(request)
 
@@ -100,7 +100,7 @@ class TestUpdateKB(unittest.TestCase):
         collection.insert_many([fluent.to_dict() for fluent in input_fluents])
 
         request = TaskPlannerUpdateKBRequest()
-        ros_fluents = [Converter.fluent_obj_to_ros(fluent) for fluent in input_fluents]
+        ros_fluents = [MessageConverter.fluent_obj_to_ros(fluent) for fluent in input_fluents]
         request.fluents_to_remove = ros_fluents
         response = self.update_kb(request)
 
@@ -113,7 +113,7 @@ class TestUpdateKB(unittest.TestCase):
     def test_add_goals(self):
         request = TaskPlannerUpdateKBRequest()
         input_predicates = self._get_dummy_predicates()
-        ros_predicates = [Converter.predicate_obj_to_ros(predicate) \
+        ros_predicates = [MessageConverter.predicate_obj_to_ros(predicate) \
             for predicate in input_predicates]
         request.goals_to_add = ros_predicates
         response = self.update_kb(request)
@@ -132,7 +132,7 @@ class TestUpdateKB(unittest.TestCase):
         collection.insert_many([predicate.to_dict() for predicate in input_predicates])
 
         request = TaskPlannerUpdateKBRequest()
-        ros_predicates = [Converter.predicate_obj_to_ros(predicate) \
+        ros_predicates = [MessageConverter.predicate_obj_to_ros(predicate) \
             for predicate in input_predicates]
         request.goals_to_remove = ros_predicates
         response = self.update_kb(request)

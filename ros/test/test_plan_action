@@ -12,7 +12,7 @@ import pymongo as pm
 from actionlib import SimpleActionClient
 
 from task_planner_ros_wrapper.msg import TaskPlannerPlanAction, TaskPlannerPlanGoal
-from task_planner_ros_utils.converter import Converter
+from task_planner_ros_utils.message_converter import MessageConverter
 from ropod.structs.task import TaskRequest
 from task_planner.knowledge_base_interface import Predicate, Fluent
 
@@ -54,9 +54,9 @@ class TestTaskPlannerPlan(unittest.TestCase):
         self._add_task_request_related_objects_and_fluents(task_request, robot_name)
         goals = self._get_goals(task_request, robot_name)
         req = TaskPlannerPlanGoal(
-            task_request=Converter.task_request_obj_to_ros(task_request),
+            task_request=MessageConverter.task_request_obj_to_ros(task_request),
             robot_name=robot_name,
-            task_goals=[Converter.predicate_obj_to_ros(goal) for goal in goals])
+            task_goals=[MessageConverter.predicate_obj_to_ros(goal) for goal in goals])
         self.client.send_goal(req)
         self.client.wait_for_result(timeout=rospy.Duration(10))
         result = self.client.get_result()
