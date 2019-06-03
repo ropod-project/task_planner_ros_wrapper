@@ -28,7 +28,7 @@ class TestUpdateKB(unittest.TestCase):
 
         """
         rospy.init_node(NODE)
-        cls.service_name = '/ropod_task_planning/task_planner/update_kb'
+        cls.service_name = '/ropod_task_planning/update_kb'
         cls.db_name = 'ropod_kb_ros'
         cls.collection_name = 'knowledge_base'
         cls.goal_collection_name = 'goals'

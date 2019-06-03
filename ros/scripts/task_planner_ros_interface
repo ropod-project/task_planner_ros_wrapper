@@ -27,6 +27,9 @@ class TaskPlannerROSInterface():
     def __init__(self):
         planner_params = rospy.get_param('~planner_params', None)
         plan_file_path = rospy.get_param('~plan_file_path', '/tmp')
+        update_kb_service_topic = rospy.get_param('~update_kb_service_topic', 'update_kb')
+        query_kb_service_topic = rospy.get_param('~query_kb_service_topic', 'query_kb')
+        plan_action_topic = rospy.get_param('~plan_action_topic', 'plan')
         self.kb_interface = KnowledgeBaseInterface(planner_params['kb_database_name'])
         self.planner = MetricFFInterface(
             planner_params['kb_database_name'],
@@ -36,11 +39,11 @@ class TaskPlannerROSInterface():
             debug=True)
         rospy.logdebug("Initialised planner")
 
-        rospy.Service('~update_kb', TaskPlannerUpdateKB, self._service_update_kb_request)
+        rospy.Service(update_kb_service_topic, TaskPlannerUpdateKB, self._service_update_kb_request)
         self._update_kb_handler = UpdateKBHandler(self.kb_interface)
-        rospy.Service('~query_kb', TaskPlannerQueryKB, self._service_query_kb_request)
+        rospy.Service(query_kb_service_topic, TaskPlannerQueryKB, self._service_query_kb_request)
         self._query_kb_handler = QueryKBHandler(self.kb_interface)
-        self._plan_server = SimpleActionServer('~plan', TaskPlannerPlanAction,
+        self._plan_server = SimpleActionServer(plan_action_topic, TaskPlannerPlanAction,
                                                self._service_plan_request, False)
         self._plan_action_handler = PlanActionHandler(self.planner)
         self._plan_server.start()

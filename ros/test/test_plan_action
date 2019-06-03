@@ -27,7 +27,7 @@ class TestTaskPlannerPlan(unittest.TestCase):
         """Initialise ros node
         """
         rospy.init_node(NODE)
-        cls.action_name = '/ropod_task_planning/task_planner/plan'
+        cls.action_name = '/ropod_task_planning/plan'
         cls.db_name = 'ropod_kb_ros'
         cls.collection_name = 'knowledge_base'
         cls.mongo_client = pm.MongoClient()

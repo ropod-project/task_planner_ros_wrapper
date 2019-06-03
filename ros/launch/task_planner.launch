@@ -2,12 +2,12 @@
 <launch>
     <group ns="ropod_task_planning">
         <node name="task_planner" pkg="task_planner_ros_wrapper" type="task_planner_ros_interface" output="screen">
-            <rosparam command="load" file="$(find task_planner_ros_wrapper)/ros/config/config.yaml" />
+            <rosparam command="load" file="$(find task_planner_ros_wrapper)/config/config.yaml" />
             <param name="plan_file_path" type="string" value="$(find task_planner_ros_wrapper)/tmp" />
 
-            <!-- <remap from="~update_kb" to="" /> -->
-            <!-- <remap from="~query_kb" to="" /> -->
-            <!-- <remap from="~plan" to="" /> -->
+            <param name="update_kb_service_topic" type="string" value="update_kb" />
+            <param name="query_kb_service_topic" type="string" value="query_kb" />
+            <param name="plan_action_topic" type="string" value="plan" />
         </node>
     </group>
 </launch>
