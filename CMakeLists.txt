@@ -24,9 +24,9 @@ include_directories(
 add_message_files(
   DIRECTORY ros/msg
   FILES
-  TaskPlannerPredicate.msg
-  TaskPlannerFluent.msg
-  TaskPlannerFluentValue.msg
+  ROSPredicate.msg
+  ROSFluent.msg
+  ROSFluentValue.msg
 )
 
 add_service_files(

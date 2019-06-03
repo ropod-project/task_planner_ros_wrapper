@@ -14,7 +14,7 @@ uint8 query_type
 string predicate_name
 
 # for GET_FLUENT_VALUE
-TaskPlannerFluent fluent
+ROSFluent fluent
 ---
 
 # for GET_PREDICATE_NAMES
@@ -24,10 +24,10 @@ string[] predicate_names
 string[] fluent_names
 
 # for GET_PREDICATE_ASSERTIONS
-TaskPlannerPredicate[] predicate_assertions
+ROSPredicate[] predicate_assertions
 
 # for GET_FLUENT_ASSERTIONS
-TaskPlannerFluent[] fluent_assertions
+ROSFluent[] fluent_assertions
 
 # for GET_FLUENT_VALUE
-TaskPlannerFluentValue fluent_value
+ROSFluentValue fluent_value

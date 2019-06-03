@@ -3,7 +3,7 @@
 # goal
 ropod_ros_msgs/TaskRequest task_request
 string robot_name
-TaskPlannerPredicate[] task_goals
+ROSPredicate[] task_goals
 ---
 # result
 bool plan_found

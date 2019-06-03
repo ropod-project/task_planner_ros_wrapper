@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 '''Convert Predicate and Fluent Object defined in task_planner.KnowledgeBaseInterface
-to their ROS versions, namely TaskPlannerPredicate and TaskPlannerFluent respectively
+to their ROS versions, namely ROSPredicate and ROSFluent respectively
 and vice versa. Also possible to convert ROS versions to tuple.
 '''
 from ropod_ros_msgs.msg import TaskRequest as TaskRequestROS
@@ -11,8 +11,8 @@ from ropod_ros_msgs.msg import Elevator as ElevatorROS
 
 from diagnostic_msgs.msg import KeyValue
 from task_planner.knowledge_base_interface import Predicate, Fluent
-from task_planner_ros_wrapper.msg import TaskPlannerPredicate, TaskPlannerFluent
-from task_planner_ros_wrapper.msg import TaskPlannerFluentValue
+from task_planner_ros_wrapper.msg import ROSPredicate, ROSFluent
+from task_planner_ros_wrapper.msg import ROSFluentValue
 
 from ropod.structs.task import TaskRequest
 from ropod.structs.action import Action
@@ -27,17 +27,17 @@ class MessageConverter():
     def predicate_obj_to_ros(predicate):
         """
         :predicate: Predicate
-        :returns: TaskPlannerPredicate
+        :returns: ROSPredicate
 
         """
-        return TaskPlannerPredicate(
+        return ROSPredicate(
             name=predicate.name,
             params=[KeyValue(key=param.name, value=param.value) for param in predicate.params])
 
     @staticmethod
     def predicate_ros_to_obj(predicate):
         """
-        :predicate: TaskPlannerPredicate
+        :predicate: ROSPredicate
         :returns: Predicate
 
         """
@@ -48,7 +48,7 @@ class MessageConverter():
     @staticmethod
     def predicate_ros_to_tuple(predicate):
         """
-        :predicate: TaskPlannerPredicate
+        :predicate: ROSPredicate
         :returns: tuple ('name', [('key', 'value')])
 
         """
@@ -58,10 +58,10 @@ class MessageConverter():
     def fluent_obj_to_ros(fluent):
         """
         :fluent: Fluent
-        :returns: TaskPlannerFluent
+        :returns: ROSFluent
 
         """
-        return TaskPlannerFluent(
+        return ROSFluent(
             name=fluent.name,
             params=[KeyValue(key=param.name, value=param.value) for param in fluent.params],
             value=MessageConverter.fluent_value_obj_to_ros(fluent.value))
@@ -69,7 +69,7 @@ class MessageConverter():
     @staticmethod
     def fluent_ros_to_obj(fluent):
         """
-        :predicate: TaskPlannerFluent
+        :predicate: ROSFluent
         :returns: Fluent
 
         """
@@ -81,7 +81,7 @@ class MessageConverter():
     @staticmethod
     def fluent_ros_to_tuple(fluent):
         """
-        :predicate: TaskPlannerFluent
+        :predicate: ROSFluent
         :returns: tuple ('name', [('key', 'value')], value)
 
         """
@@ -92,29 +92,29 @@ class MessageConverter():
     def fluent_value_obj_to_ros(value):
         """
         :value: string or int
-        :returns: TaskPlannerFluentValue
+        :returns: ROSFluentValue
 
         """
         if isinstance(value, int):
-            return TaskPlannerFluentValue(
-                data_type=TaskPlannerFluentValue.INT,
+            return ROSFluentValue(
+                data_type=ROSFluentValue.INT,
                 data=str(value))
         if isinstance(value, str):
-            return TaskPlannerFluentValue(
-                data_type=TaskPlannerFluentValue.STRING,
+            return ROSFluentValue(
+                data_type=ROSFluentValue.STRING,
                 data=value)
-        return TaskPlannerFluentValue(data_type=TaskPlannerFluentValue.STRING)
+        return ROSFluentValue(data_type=ROSFluentValue.STRING)
 
     @staticmethod
     def fluent_value_ros_to_obj(fluent_value):
         """
-        :fluent_value: TaskPlannerFluentValue
+        :fluent_value: ROSFluentValue
         :returns: string or int
 
         """
-        if fluent_value.data_type == TaskPlannerFluentValue.INT:
+        if fluent_value.data_type == ROSFluentValue.INT:
             return int(fluent_value.data)
-        if fluent_value.data_type == TaskPlannerFluentValue.STRING:
+        if fluent_value.data_type == ROSFluentValue.STRING:
             return fluent_value.data
         return fluent_value.data
 
