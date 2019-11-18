@@ -165,7 +165,7 @@ class MessageConverter():
             id=area.id,
             name=area.name,
             type=area.type,
-            floor_number=area.floor_number,
+            floor_number=int(area.floor_number),
             sub_areas=[MessageConverter.sub_area_obj_to_ros(sub_area) for sub_area in area.sub_areas])
 
     @staticmethod
